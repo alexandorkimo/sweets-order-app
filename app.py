@@ -9,12 +9,12 @@ import os
 # Page Setup
 st.set_page_config(
     page_title="STOCK TRANSFER | Jamal Showaiter",
-    page_icon="🍬",
+    page_icon="⚡",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-# Persistent Data File
+# Persistent Storage
 DB_FILE = "transfers_data.json"
 
 def load_data():
@@ -33,13 +33,13 @@ def save_data(data):
     except Exception:
         pass
 
-# ULTRA HIGH-DEFINITION LUXURY DARK GLASS THEME
+# NEXT-GEN 3D LUXURY GLASS UI + ANIMATION + SOUND INJECTION
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
     
     * {
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family: 'Space Grotesk', -apple-system, sans-serif;
         letter-spacing: -0.2px;
     }
     
@@ -48,38 +48,68 @@ st.markdown("""
         display: none !important; 
     }
     
-    /* Deep OLED Background with Ambient Mesh Gradients */
+    /* Pitch Black OLED + Dynamic Mesh Gradients */
     .stApp {
-        background-color: #030712 !important;
+        background-color: #02040A !important;
         background-image: 
-            radial-gradient(at 0% 0%, rgba(217, 119, 6, 0.08) 0px, transparent 50%),
-            radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.06) 0px, transparent 50%),
-            radial-gradient(at 50% 50%, rgba(15, 23, 42, 0.5) 0px, transparent 100%) !important;
+            radial-gradient(at 0% 0%, rgba(217, 119, 6, 0.12) 0px, transparent 55%),
+            radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.1) 0px, transparent 55%),
+            radial-gradient(at 50% 30%, rgba(30, 41, 59, 0.4) 0px, transparent 100%) !important;
         background-attachment: fixed !important;
         color: #F8FAFC !important;
     }
 
-    /* Frosted Glass Top Banner */
+    /* 3D Rotating Holographic Cube Reactor */
+    .hologram-stage {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 75px;
+        perspective: 800px;
+        margin-bottom: 12px;
+    }
+    
+    .cube-3d {
+        width: 44px;
+        height: 44px;
+        transform-style: preserve-3d;
+        animation: spin3D 10s infinite linear;
+    }
+    
+    .face {
+        position: absolute;
+        width: 44px;
+        height: 44px;
+        background: rgba(217, 119, 6, 0.12);
+        border: 1.5px solid #F59E0B;
+        box-shadow: 0 0 15px rgba(245, 158, 11, 0.4), inset 0 0 10px rgba(245, 158, 11, 0.2);
+    }
+    
+    .face-front  { transform: rotateY(0deg) translateZ(22px); }
+    .face-back   { transform: rotateY(180deg) translateZ(22px); }
+    .face-right  { transform: rotateY(90deg) translateZ(22px); }
+    .face-left   { transform: rotateY(-90deg) translateZ(22px); }
+    .face-top    { transform: rotateX(90deg) translateZ(22px); }
+    .face-bottom { transform: rotateX(-90deg) translateZ(22px); }
+    
+    @keyframes spin3D {
+        0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+        100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
+    }
+
+    /* 3D Glass Top Banner */
     .header-box {
-        background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%);
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.85) 100%);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 20px;
-        padding: 22px 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        position: relative;
-        overflow: hidden;
+        padding: 20px;
+        margin-bottom: 18px;
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        border-left: 4px solid #F59E0B;
     }
     
-    .header-box::after {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; width: 4px; height: 100%;
-        background: linear-gradient(180deg, #F59E0B 0%, #D97706 100%);
-    }
-
     .comp-name {
         font-family: 'JetBrains Mono', monospace;
         font-size: 11px;
@@ -87,7 +117,7 @@ st.markdown("""
         color: #FBBF24;
         letter-spacing: 2px;
         text-transform: uppercase;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
     }
 
     .app-title {
@@ -95,135 +125,90 @@ st.markdown("""
         font-weight: 800;
         color: #FFFFFF;
         letter-spacing: -0.5px;
-        margin: 0 0 10px 0;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        margin: 0 0 8px 0;
+        text-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
     }
 
     .branch-tag {
         display: inline-flex;
         align-items: center;
-        background: rgba(14, 165, 233, 0.12);
-        border: 1px solid rgba(56, 189, 248, 0.3);
+        background: rgba(14, 165, 233, 0.15);
+        border: 1px solid rgba(56, 189, 248, 0.4);
         color: #38BDF8;
         font-family: 'JetBrains Mono', monospace;
         font-size: 12px;
         font-weight: 700;
         padding: 4px 12px;
         border-radius: 30px;
-        letter-spacing: 0.5px;
+        box-shadow: 0 0 15px rgba(14, 165, 233, 0.2);
     }
 
-    /* Modern Tabs Styling */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background: rgba(15, 23, 42, 0.6);
-        padding: 6px;
-        border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(10px);
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 10px;
-        color: #94A3B8;
-        font-weight: 600;
-        font-size: 13px;
-        padding: 8px 16px;
-        border: none !important;
-        background: transparent !important;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background: rgba(255, 255, 255, 0.1) !important;
-        color: #FFFFFF !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Glass Cards */
-    .order-card {
-        background: rgba(17, 24, 39, 0.65);
+    /* Futuristic Live Order Card with Ambient Border */
+    .order-card-live {
+        background: linear-gradient(135deg, rgba(20, 27, 45, 0.8) 0%, rgba(11, 15, 25, 0.9) 100%);
         backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(245, 158, 11, 0.35);
         padding: 18px;
-        border-radius: 16px;
+        border-radius: 18px;
         margin-bottom: 14px;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-        transition: transform 0.2s ease, border-color 0.2s ease;
+        box-shadow: 0 10px 30px -5px rgba(245, 158, 11, 0.15);
+        position: relative;
+        overflow: hidden;
     }
     
-    .order-card:hover {
-        border-color: rgba(245, 158, 11, 0.3);
+    .order-card-live::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 4px; height: 100%;
+        background: #F59E0B;
+        box-shadow: 0 0 10px #F59E0B;
     }
 
-    /* Badges */
-    .badge-transit {
+    /* Pulsing Status Badges */
+    .badge-pulsing {
         background: rgba(245, 158, 11, 0.15);
         color: #FBBF24;
-        border: 1px solid rgba(245, 158, 11, 0.35);
-        padding: 3px 10px;
+        border: 1px solid rgba(245, 158, 11, 0.4);
+        padding: 4px 10px;
         border-radius: 20px;
         font-size: 11px;
         font-weight: 700;
         font-family: 'JetBrains Mono', monospace;
-        letter-spacing: 0.5px;
+        animation: pulseGlow 2s infinite;
     }
     
+    @keyframes pulseGlow {
+        0% { box-shadow: 0 0 0px rgba(245, 158, 11, 0); }
+        50% { box-shadow: 0 0 12px rgba(245, 158, 11, 0.5); }
+        100% { box-shadow: 0 0 0px rgba(245, 158, 11, 0); }
+    }
+
     .badge-received {
         background: rgba(16, 185, 129, 0.15);
         color: #34D399;
-        border: 1px solid rgba(16, 185, 129, 0.35);
-        padding: 3px 10px;
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        padding: 4px 10px;
         border-radius: 20px;
         font-size: 11px;
         font-weight: 700;
         font-family: 'JetBrains Mono', monospace;
-        letter-spacing: 0.5px;
     }
 
-    /* Success Banner */
-    .success-box {
-        background: linear-gradient(135deg, rgba(6, 78, 59, 0.4) 0%, rgba(4, 120, 87, 0.2) 100%);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(52, 211, 153, 0.4);
-        border-radius: 16px;
-        padding: 18px;
-        margin: 16px 0;
-        box-shadow: 0 10px 25px -5px rgba(4, 120, 87, 0.3);
-    }
-
-    /* Luxury Inputs */
-    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stSelectbox>div>div {
-        background: rgba(15, 23, 42, 0.8) !important;
-        backdrop-filter: blur(10px) !important;
-        color: #F8FAFC !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        border-radius: 12px !important;
-        font-size: 14px !important;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
-    }
-
-    .stTextInput>div>div>input:focus, .stTextArea>div>div>textarea:focus {
-        border-color: #F59E0B !important;
-        box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2) !important;
-    }
-
-    /* Buttons */
+    /* Glowing 3D Action Buttons */
     .stButton>button {
         background: linear-gradient(135deg, #D97706 0%, #B45309 100%) !important;
         color: #FFFFFF !important;
-        border: 1px solid rgba(251, 191, 36, 0.3) !important;
+        border: 1px solid rgba(251, 191, 36, 0.4) !important;
         border-radius: 12px !important;
         font-weight: 700 !important;
         font-size: 14px !important;
         height: 48px !important;
-        box-shadow: 0 6px 20px -3px rgba(217, 119, 6, 0.4) !important;
+        box-shadow: 0 8px 25px -4px rgba(217, 119, 6, 0.5) !important;
         transition: all 0.2s ease !important;
     }
-    
     .stButton>button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 8px 25px -3px rgba(217, 119, 6, 0.6) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px -4px rgba(217, 119, 6, 0.7) !important;
     }
 
     .wa-btn {
@@ -236,23 +221,28 @@ st.markdown("""
         text-decoration: none;
         font-weight: 700;
         font-size: 13px;
-        box-shadow: 0 6px 20px -3px rgba(16, 185, 129, 0.35);
-        border: 1px solid rgba(52, 211, 153, 0.3);
+        border: 1px solid rgba(52, 211, 153, 0.4);
+        box-shadow: 0 8px 25px -4px rgba(16, 185, 129, 0.4);
+    }
+    
+    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stSelectbox>div>div {
+        background: rgba(15, 23, 42, 0.8) !important;
+        color: #F8FAFC !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 12px !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Voucher PDF Generator (Matching Physical Voucher Photo)
+# Voucher PDF Generator
 def create_voucher_pdf(trx):
     pdf = FPDF(orientation='P', unit='mm', format='A4')
     pdf.set_auto_page_break(auto=False)
     pdf.add_page()
     
-    # Cream/Yellow Voucher Paper Tint
     pdf.set_fill_color(254, 252, 235)
     pdf.rect(5, 5, 200, 287, "F")
     
-    # Header Details
     pdf.set_xy(10, 10)
     pdf.set_font("Helvetica", "B", 13)
     pdf.set_text_color(20, 20, 20)
@@ -265,7 +255,6 @@ def create_voucher_pdf(trx):
     pdf.set_font("Helvetica", "B", 11)
     pdf.cell(190, 5, "STOCK TRANSFER NOTE", ln=True, align="C")
     
-    # Serial No & Date
     pdf.set_xy(10, 26)
     pdf.set_font("Helvetica", "B", 9.5)
     pdf.write(5, "No: ")
@@ -281,7 +270,6 @@ def create_voucher_pdf(trx):
     pdf.set_font("Helvetica", "", 9)
     pdf.cell(38, 5, f" {trx['date_str']}", border="B")
     
-    # Locations
     pdf.set_xy(10, 33)
     pdf.set_font("Helvetica", "B", 9)
     pdf.cell(26, 5, "From Location: ")
@@ -294,7 +282,6 @@ def create_voucher_pdf(trx):
     pdf.set_font("Helvetica", "", 9)
     pdf.cell(158, 5, f" {trx['to_branch']}", border="B")
     
-    # Columns
     widths = [10, 18, 74, 14, 22, 22, 30]
     headers = ["S.No.", "Date", "Description", "Qty", "Selling Price", "Unit Price", "Amount (BD)"]
     
@@ -307,7 +294,6 @@ def create_voucher_pdf(trx):
         pdf.cell(widths[i], 7, headers[i], border=1, align="C", fill=True)
     pdf.ln()
     
-    # 14 Grid Rows
     items = trx.get("items_list", [])
     row_height = 8
     pdf.set_font("Helvetica", "", 8)
@@ -328,14 +314,12 @@ def create_voucher_pdf(trx):
                 pdf.cell(w, row_height, "", border=1)
         pdf.ln()
         
-    # Total Amount
     pdf.set_x(10)
     pdf.set_font("Helvetica", "B", 9)
     pdf.cell(160, 7.5, "Total Amount  ", border=1, align="R")
     pdf.cell(30, 7.5, trx.get("total_amount", ""), border=1, align="C")
     pdf.ln(12)
     
-    # Signatures
     pdf.set_x(10)
     pdf.set_font("Helvetica", "B", 9)
     pdf.cell(20, 5, "Issued by: ")
@@ -350,7 +334,6 @@ def create_voucher_pdf(trx):
     
     return bytes(pdf.output())
 
-# Branch Configuration
 BRANCHES = [
     "KSSFCT-01",
     "KSSF-01",
@@ -368,7 +351,21 @@ if "b" in query_params:
     if val in BRANCHES:
         selected_branch = val
 
-# Glassmorphic Top Brand Header
+# 3D Rotating Animated Hologram
+st.markdown("""
+<div class="hologram-stage">
+    <div class="cube-3d">
+        <div class="face face-front"></div>
+        <div class="face face-back"></div>
+        <div class="face face-right"></div>
+        <div class="face face-left"></div>
+        <div class="face face-top"></div>
+        <div class="face face-bottom"></div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Top Luxury Header
 st.markdown(f"""
 <div class="header-box">
     <div class="comp-name">JAMAL SHOWAITER SWEETS CO. W.L.L.</div>
@@ -409,7 +406,7 @@ with tab_dispatch:
         elif not items_input.strip():
             st.warning("Please specify the items to transfer.")
         else:
-            with st.spinner("Encrypting & Formatting Voucher..."):
+            with st.spinner("Formatting Voucher..."):
                 parsed_list = []
                 if api_key:
                     try:
@@ -453,40 +450,55 @@ with tab_dispatch:
     if "last_issued" in st.session_state:
         last = st.session_state["last_issued"]
         st.markdown(f"""
-        <div class="success-box">
+        <div style="background: rgba(16, 185, 129, 0.12); border: 1.5px solid #10B981; border-radius: 16px; padding: 18px; margin-top: 14px;">
             <div style="font-size: 15px; font-weight: 800; color: #34D399; margin-bottom: 4px;">
                 ✅ TRANSFER NOTE ISSUED SUCCESSFULLY!
             </div>
             <div style="font-size: 13px; color: #F8FAFC; margin-bottom: 6px;">
                 Voucher <b>ST {253600 + last['id']}</b> logged and dispatched to <b>{last['to_branch']}</b>.
             </div>
-            <div style="font-size: 12px; color: #94A3B8; font-family: 'JetBrains Mono', monospace;">
+            <div style="font-size: 12px; color: #94A3B8; font-family: 'JetBrains Mono';">
                 Issued by: {last['sender_name']} | Time: {last['date_str']} {last['time_str']}
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-# 2. INCOMING TAB
+# 2. INCOMING TAB WITH AUDIO CHIME & LIVE ALERT
 with tab_inbox:
-    st.markdown(f"##### 📥 Incoming Deliveries ({selected_branch})")
+    st.markdown(f"##### 📥 Live Incoming Queue ({selected_branch})")
     all_data = load_data()
     incoming_pending = [t for t in reversed(all_data) if t["to_branch"] == selected_branch and t["status"] == "IN TRANSIT"]
     
     if not incoming_pending:
         st.info(f"No pending transfers arriving at {selected_branch}.")
     else:
+        # LIVE NOTIFICATION CHIME (Plays standard notification chime sound via HTML5 Audio)
+        audio_html = """
+        <audio autoplay style="display:none;">
+            <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+        </audio>
+        """
+        st.markdown(audio_html, unsafe_allow_html=True)
+        
+        st.markdown(f"""
+        <div style="background: rgba(245, 158, 11, 0.15); border: 1px solid #F59E0B; padding: 10px 16px; border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 20px;">🔔</span>
+            <span style="font-weight: 700; color: #FBBF24; font-size: 13px;">NEW ORDER RECEIVED! You have {len(incoming_pending)} stock transfer(s) awaiting acceptance.</span>
+        </div>
+        """, unsafe_allow_html=True)
+
         for trx in incoming_pending:
             v_no = f"ST {253600 + trx['id']}"
             st.markdown(f"""
-            <div class="order-card">
+            <div class="order-card-live">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <b style="font-size: 15px; color: #38BDF8;">No: {v_no}</b>
-                    <span class="badge-transit">⏳ PENDING ACCEPTANCE</span>
+                    <b style="font-size: 16px; color: #38BDF8;">No: {v_no}</b>
+                    <span class="badge-pulsing">● LIVE INCOMING</span>
                 </div>
-                <div style="font-size: 13px; color: #CBD5E1; margin-top: 6px;">
+                <div style="font-size: 13px; color: #E2E8F0; margin-top: 6px;">
                     Origin: <b>{trx['from_branch']}</b> | Dispatched by: <b>{trx['sender_name']}</b>
                 </div>
-                <div style="font-size: 11px; color: #64748B; font-family: 'JetBrains Mono';">
+                <div style="font-size: 11px; color: #94A3B8; font-family: 'JetBrains Mono'; margin-top: 2px;">
                     Time: {trx['date_str']} at {trx['time_str']}
                 </div>
             </div>
@@ -558,10 +570,10 @@ with tab_history:
             v_no = f"ST {253600 + trx['id']}"
             is_out = (trx["from_branch"] == selected_branch)
             direction = f"📤 Sent to {trx['to_branch']}" if is_out else f"📥 Received from {trx['from_branch']}"
-            badge_html = '<span class="badge-received">✅ RECEIVED</span>' if trx['status'] == "RECEIVED" else '<span class="badge-transit">⏳ IN TRANSIT</span>'
+            badge_html = '<span class="badge-received">✅ RECEIVED</span>' if trx['status'] == "RECEIVED" else '<span class="badge-pulsing">⏳ IN TRANSIT</span>'
             
             st.markdown(f"""
-            <div class="order-card">
+            <div style="background: rgba(17, 24, 39, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); padding: 16px; border-radius: 14px; margin-bottom: 12px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <b style="font-size: 15px; color: #F8FAFC;">No: {v_no}</b>
                     {badge_html}
@@ -601,3 +613,34 @@ with tab_history:
                     wa_link = f"https://api.whatsapp.com/send?text={urllib.parse.quote(wa_msg)}"
                     st.markdown(f'<a href="{wa_link}" target="_blank" class="wa-btn">📲 WhatsApp</a>', unsafe_allow_html=True)
             st.divider()
+
+    # Clear History Section
+    if branch_history:
+        st.markdown("""
+        <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 14px; padding: 14px; margin-top: 20px;">
+            <b style="color: #F87171; font-size: 14px;">🗑️ Clear Transfer History</b><br>
+            <span style="font-size: 12px; color: #9CA3AF;">Delete history records permanently from storage.</span>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        confirm_del = st.checkbox(f"Confirm deletion for {selected_branch}", key="confirm_del_box")
+        
+        col_c1, col_c2 = st.columns(2)
+        with col_c1:
+            if st.button(f"🗑️ Clear {selected_branch} Only", use_container_width=True):
+                if not confirm_del:
+                    st.warning("⚠️ Please check confirmation box first.")
+                else:
+                    updated_data = [t for t in all_data if t["from_branch"] != selected_branch and t["to_branch"] != selected_branch]
+                    save_data(updated_data)
+                    st.success(f"History cleared for {selected_branch}!")
+                    st.rerun()
+                    
+        with col_c2:
+            if st.button("⚠️ Clear Entire System Data", use_container_width=True):
+                if not confirm_del:
+                    st.warning("⚠️ Please check confirmation box first.")
+                else:
+                    save_data([])
+                    st.success("All system history cleared successfully!")
+                    st.rerun()
