@@ -8,7 +8,7 @@ import os
 import re
 
 st.set_page_config(
-    page_title="Jamal Showaiter Enterprise",
+    page_title="Jamal Showaiter | Express Transfer",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
@@ -51,13 +51,13 @@ def parse_items_manual(text):
         })
     return parsed
 
-# NATIVE ANDROID MATERIAL ENTERPRISE DARK THEME
+# TALABAT STYLE MODERN MOBILE APP UI
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap');
     
     * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        font-family: 'Plus Jakarta Sans', -apple-system, sans-serif !important;
         -webkit-font-smoothing: antialiased;
     }
     
@@ -66,166 +66,195 @@ st.markdown("""
         display: none !important; 
     }
     
-    /* Native App Dark Slate Canvas */
     .stApp {
-        background-color: #0B0E14 !important;
-        color: #E6EDF3 !important;
+        background-color: #0E1117 !important;
+        color: #F8FAFC !important;
     }
 
-    /* Android Native Top App Bar */
-    .appbar-container {
-        background: #161B22;
-        border: 1px solid #30363D;
-        border-radius: 16px;
-        padding: 16px 20px;
-        margin-bottom: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    /* Talabat App Header Bar */
+    .talabat-header {
+        background: linear-gradient(180deg, #181D27 0%, #12161F 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 16px 18px;
+        margin-bottom: 18px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     }
-
-    .corp-title {
+    
+    .loc-sub {
         font-size: 11px;
         font-weight: 700;
+        color: #FF5A00;
         letter-spacing: 1.5px;
-        color: #D29922;
         text-transform: uppercase;
-        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 5px;
     }
-
-    .app-headline {
+    
+    .loc-main {
         font-size: 20px;
         font-weight: 800;
-        letter-spacing: -0.4px;
         color: #FFFFFF;
-        margin: 0;
+        letter-spacing: -0.5px;
+        margin: 2px 0 6px 0;
     }
-
-    .status-chip {
+    
+    .branch-badge {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background: #21262D;
-        border: 1px solid #30363D;
-        color: #58A6FF;
-        font-family: 'Roboto Mono', monospace !important;
-        font-size: 11.5px;
-        font-weight: 700;
-        padding: 4px 10px;
-        border-radius: 8px;
-        align-self: flex-start;
-        margin-top: 4px;
+        background: rgba(255, 90, 0, 0.12);
+        border: 1px solid rgba(255, 90, 0, 0.35);
+        color: #FF7A30;
+        font-family: 'JetBrains Mono', monospace !important;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 4px 12px;
+        border-radius: 25px;
     }
 
-    /* Material Surface Cards */
-    .native-card {
-        background: #161B22;
-        border: 1px solid #30363D;
-        border-radius: 14px;
-        padding: 16px;
-        margin-bottom: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-    }
-
-    .native-card-header {
+    /* Talabat Quick Category Chips */
+    .cat-scroll-container {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 10px;
+        margin-bottom: 12px;
     }
-
-    .card-title {
-        font-size: 15px;
-        font-weight: 700;
-        color: #F0F6FC;
-        margin: 0;
-    }
-
-    .chip-transit {
-        background: rgba(187, 128, 9, 0.15);
-        color: #E3B341;
-        border: 1px solid rgba(187, 128, 9, 0.4);
-        padding: 3px 8px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 700;
-        font-family: 'Roboto Mono', monospace !important;
-    }
-
-    .chip-received {
-        background: rgba(35, 134, 54, 0.15);
-        color: #3FB950;
-        border: 1px solid rgba(35, 134, 54, 0.4);
-        padding: 3px 8px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 700;
-        font-family: 'Roboto Mono', monospace !important;
-    }
-
-    /* Native Tabs */
-    .stTabs [data-baseweb="tab-list"] {
-        background: #161B22;
-        padding: 4px;
+    
+    .cat-chip {
+        background: #181D27;
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 12px;
-        border: 1px solid #30363D;
+        padding: 8px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #94A3B8;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
         gap: 6px;
     }
 
+    /* Talabat Food Delivery Style Cards */
+    .talabat-card {
+        background: #181D27;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        padding: 16px;
+        margin-bottom: 14px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        position: relative;
+    }
+
+    .live-dot {
+        width: 8px;
+        height: 8px;
+        background: #FF5A00;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 10px #FF5A00;
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(0.95); opacity: 0.8; }
+        50% { transform: scale(1.3); opacity: 1; }
+        100% { transform: scale(0.95); opacity: 0.8; }
+    }
+
+    .chip-transit {
+        background: rgba(255, 90, 0, 0.15);
+        color: #FF7A30;
+        border: 1px solid rgba(255, 90, 0, 0.4);
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 800;
+        font-family: 'JetBrains Mono', monospace !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .chip-delivered {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34D399;
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 800;
+        font-family: 'JetBrains Mono', monospace !important;
+    }
+
+    /* Talabat Style Tab Navigation */
+    .stTabs [data-baseweb="tab-list"] {
+        background: #141822;
+        padding: 6px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
     .stTabs [data-baseweb="tab"] {
-        border-radius: 8px;
-        color: #8B949E;
-        font-weight: 600;
+        border-radius: 12px;
+        color: #94A3B8;
+        font-weight: 700;
         font-size: 13px;
-        padding: 8px 14px;
+        padding: 10px 18px;
         background: transparent !important;
         border: none !important;
     }
 
     .stTabs [aria-selected="true"] {
-        background: #21262D !important;
-        color: #F0F6FC !important;
-        border: 1px solid #30363D !important;
+        background: #FF5A00 !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 4px 15px rgba(255, 90, 0, 0.35);
     }
 
-    /* Native Android Form Inputs */
-    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stSelectbox>div>div {
-        background: #0D1117 !important;
-        color: #C9D1D9 !important;
-        border: 1px solid #30363D !important;
-        border-radius: 10px !important;
-        font-size: 13.5px !important;
+    /* Talabat Orange Action Button */
+    .stButton>button {
+        background: linear-gradient(135deg, #FF5A00 0%, #E04800 100%) !important;
+        color: #FFFFFF !important;
+        border: none !important;
+        border-radius: 14px !important;
+        font-weight: 800 !important;
+        font-size: 14.5px !important;
+        height: 50px !important;
+        box-shadow: 0 8px 25px rgba(255, 90, 0, 0.4) !important;
+        letter-spacing: -0.2px;
     }
     
-    .stTextInput>div>div>input:focus, .stTextArea>div>div>textarea:focus {
-        border-color: #58A6FF !important;
+    .stButton>button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 30px rgba(255, 90, 0, 0.6) !important;
     }
 
-    /* Material Action Button */
-    .stButton>button {
-        background: #238636 !important;
-        color: #FFFFFF !important;
-        border: 1px solid rgba(240, 246, 252, 0.1) !important;
-        border-radius: 10px !important;
-        font-weight: 700 !important;
-        font-size: 14px !important;
-        height: 46px !important;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
-    }
-
-    .wa-native-btn {
-        display: block;
-        background: #1F6FEB;
-        color: #FFFFFF !important;
+    .wa-talabat-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #25D366;
+        color: white !important;
         text-align: center;
-        padding: 10px;
-        border-radius: 10px;
+        padding: 12px;
+        border-radius: 14px;
         text-decoration: none;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 13px;
+        box-shadow: 0 6px 20px rgba(37, 211, 102, 0.3);
         margin-top: 6px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stSelectbox>div>div {
+        background: #141822 !important;
+        color: #F8FAFC !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 14px !important;
+        font-size: 14px !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -353,12 +382,12 @@ if "b" in query_params:
     if val in BRANCHES:
         selected_branch = val
 
-# Native Clean App Bar
+# Talabat Top Mobile Navigation Bar
 st.markdown(f"""
-<div class="appbar-container">
-    <div class="corp-title">Jamal Showaiter Sweets Co. W.L.L.</div>
-    <div class="app-headline">Stock Transfer System</div>
-    <div class="status-chip">TERMINAL: {selected_branch}</div>
+<div class="talabat-header">
+    <div class="loc-sub">● ACTIVE STORE LOCATION</div>
+    <div class="loc-main">Jamal Showaiter Sweets</div>
+    <div class="branch-badge">HUB: {selected_branch}</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -368,33 +397,44 @@ if "b" not in query_params:
         st.query_params["b"] = new_branch
         st.rerun()
 
+# Category Chips Bar (Talabat Style)
+st.markdown("""
+<div class="cat-scroll-container">
+    <div class="cat-chip" style="background:#FF5A00; color:white;">⚡ All Items</div>
+    <div class="cat-chip">👑 Royal Halwa</div>
+    <div class="cat-chip">🥐 VIP Baklava</div>
+    <div class="cat-chip">🍪 Kamfaroosh</div>
+    <div class="cat-chip">🍯 Honey & Nuts</div>
+</div>
+""", unsafe_allow_html=True)
+
 tab_dispatch, tab_inbox, tab_history = st.tabs([
-    "Dispatch", 
-    "Incoming", 
+    "Dispatch Order", 
+    "Live Orders", 
     "History"
 ])
 
 api_key = st.secrets.get("GEMINI_API_KEY", "")
 
-# 1. DISPATCH
+# 1. DISPATCH (TALABAT ORDER CREATION STYLE)
 with tab_dispatch:
-    st.markdown("##### New Stock Transfer")
+    st.markdown("##### Create Stock Dispatch")
     other_branches = [b for b in BRANCHES if b != selected_branch]
-    to_loc = st.selectbox("Destination Location:", other_branches)
-    issuer = st.text_input("Issued by (Staff Name):", placeholder="Name")
+    to_loc = st.selectbox("Transfer Destination:", other_branches)
+    issuer = st.text_input("Dispatched by (Your Name):", placeholder="Staff Name")
     items_input = st.text_area(
-        "Item Manifest & Quantity:", 
-        placeholder="kamfaroosh 10\nHalwa Red King 5 kg\nVIP Baklava 2 boxes",
+        "Add Items & Quantity:", 
+        placeholder="kamfaroosh 10\nRoyal Halwa 5 kg\nVIP Baklava 2 boxes",
         height=120
     )
     
-    if st.button("Submit Stock Dispatch", use_container_width=True):
+    if st.button("Place Transfer Order ⚡", use_container_width=True):
         if not issuer.strip():
-            st.warning("Staff signature required in 'Issued by'.")
+            st.warning("Please enter your name.")
         elif not items_input.strip():
-            st.warning("Please specify items to transfer.")
+            st.warning("Please enter items to transfer.")
         else:
-            with st.spinner("Processing Transfer..."):
+            with st.spinner("Processing Dispatch Order..."):
                 parsed_list = []
                 if api_key:
                     try:
@@ -436,60 +476,60 @@ with tab_dispatch:
     if "last_issued" in st.session_state:
         last = st.session_state["last_issued"]
         st.markdown(f"""
-        <div class="native-card" style="border-left: 4px solid #238636; margin-top: 14px;">
-            <div style="font-size: 14px; font-weight: 700; color: #3FB950; margin-bottom: 2px;">
-                TRANSFER INITIATED SUCCESSFULLY
+        <div class="talabat-card" style="border-left: 4px solid #FF5A00; margin-top: 14px;">
+            <div style="font-size: 14.5px; font-weight: 800; color: #FF7A30; margin-bottom: 2px;">
+                ORDER DISPATCHED SUCCESSFULLY
             </div>
-            <div style="font-size: 13px; color: #C9D1D9;">
-                Voucher <b>ST {253600 + last['id']}</b> logged for <b>{last['to_branch']}</b>.
+            <div style="font-size: 13px; color: #F8FAFC;">
+                Voucher <b>ST {253600 + last['id']}</b> sent to <b>{last['to_branch']}</b>.
             </div>
-            <div style="font-size: 11.5px; color: #8B949E; margin-top: 4px;">
-                Issuer: {last['sender_name']} | Time: {last['date_str']} {last['time_str']}
+            <div style="font-size: 11.5px; color: #94A3B8; margin-top: 4px;">
+                Issued by: {last['sender_name']} | Time: {last['date_str']} {last['time_str']}
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-# 2. INCOMING
+# 2. INCOMING (TALABAT LIVE ORDER TRACKING STYLE)
 with tab_inbox:
-    st.markdown(f"##### Incoming Queue ({selected_branch})")
+    st.markdown(f"##### Incoming Deliveries ({selected_branch})")
     all_data = load_data()
     incoming_pending = [t for t in reversed(all_data) if t["to_branch"] == selected_branch and t["status"] == "IN TRANSIT"]
     
     if not incoming_pending:
-        st.info(f"No incoming transfers arriving at {selected_branch}.")
+        st.info(f"No incoming deliveries arriving at {selected_branch}.")
     else:
         st.markdown(f"""
-        <div class="native-card" style="border-left: 4px solid #D29922; padding: 12px 16px;">
-            <span style="font-weight: 600; color: #E3B341; font-size: 13px;">Pending Verification: {len(incoming_pending)} transfer(s) awaiting acceptance.</span>
+        <div class="talabat-card" style="border-left: 4px solid #FF5A00; padding: 12px 16px;">
+            <span style="font-weight: 700; color: #FF7A30; font-size: 13px;">🔔 Live Queue: {len(incoming_pending)} incoming order(s) arriving for acceptance.</span>
         </div>
         """, unsafe_allow_html=True)
 
         for trx in incoming_pending:
             v_no = f"ST {253600 + trx['id']}"
             st.markdown(f"""
-            <div class="native-card">
-                <div class="native-card-header">
-                    <span class="card-title">Voucher #{v_no}</span>
-                    <span class="chip-transit">IN TRANSIT</span>
+            <div class="talabat-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 15px; font-weight: 800; color: #FFFFFF;">Order #{v_no}</span>
+                    <span class="chip-transit"><span class="live-dot"></span> ON THE WAY</span>
                 </div>
-                <div style="font-size: 13px; color: #C9D1D9;">
-                    Origin: <b>{trx['from_branch']}</b> | Sender: <b>{trx['sender_name']}</b>
+                <div style="font-size: 13px; color: #CBD5E1;">
+                    From: <b>{trx['from_branch']}</b> | Sent by: <b>{trx['sender_name']}</b>
                 </div>
-                <div style="font-size: 11.5px; color: #8B949E; margin-top: 2px;">
+                <div style="font-size: 11.5px; color: #94A3B8; margin-top: 2px;">
                     Dispatched: {trx['date_str']} at {trx['time_str']}
                 </div>
             </div>
             """, unsafe_allow_html=True)
             
-            st.markdown("**Manifest Details:**")
+            st.markdown("**Order Items:**")
             for it in trx['items_list']:
                 st.caption(f"• **{it.get('desc')}** — Qty: **{it.get('qty', 'N/A')}**")
                 
-            rec_name = st.text_input("Approved by (Receiver Name):", key=f"rec_sig_{trx['id']}", placeholder="Your name")
+            rec_name = st.text_input("Receiver Name:", key=f"rec_sig_{trx['id']}", placeholder="Your name")
             
-            if st.button(f"Confirm & Accept Stock #{trx['id']}", key=f"btn_accept_{trx['id']}", use_container_width=True):
+            if st.button(f"Accept & Confirm Delivery #{trx['id']}", key=f"btn_accept_{trx['id']}", use_container_width=True):
                 if not rec_name.strip():
-                    st.warning("Receiver name required.")
+                    st.warning("Please type your name to accept delivery.")
                 else:
                     for item in all_data:
                         if item["id"] == trx["id"]:
@@ -499,16 +539,16 @@ with tab_inbox:
                             break
                     save_data(all_data)
                     st.session_state[f"accepted_{trx['id']}"] = True
-                    st.success(f"Voucher #{trx['id']} verified!")
+                    st.success(f"Order #{trx['id']} Received & Verified!")
                     st.rerun()
 
             if st.session_state.get(f"accepted_{trx['id']}", False) or trx["status"] == "RECEIVED":
-                st.success("Verification complete. Document generated:")
+                st.success("Delivery Confirmed! Download invoice below:")
                 pdf_bytes = create_voucher_pdf(trx)
                 col1, col2 = st.columns(2)
                 with col1:
                     st.download_button(
-                        label="Download PDF Note",
+                        label="📄 Download PDF Voucher",
                         data=pdf_bytes,
                         file_name=f"Voucher_{v_no.replace(' ', '_')}.pdf",
                         mime="application/pdf",
@@ -520,44 +560,44 @@ with tab_inbox:
                     wa_msg = (
                         f"*JAMAL SHOWAITER SWEETS Co. W.L.L.*\n"
                         f"*STOCK TRANSFER NOTE*\n\n"
-                        f"*No:* {v_no}\n"
+                        f"*Order No:* {v_no}\n"
                         f"*Date:* {trx['date_str']}\n"
                         f"*From:* {trx['from_branch']}\n"
                         f"*To:* {trx['to_branch']}\n"
                         f"*Issued by:* {trx['sender_name']}\n"
-                        f"*Approved by:* {trx['receiver_name']}\n\n"
+                        f"*Accepted by:* {trx['receiver_name']}\n\n"
                         f"*Items:*\n{wa_items}\n\n"
-                        f"_Official Verified Transfer Note._"
+                        f"_Order Verified & Received Successfully._"
                     )
                     wa_link = f"https://api.whatsapp.com/send?text={urllib.parse.quote(wa_msg)}"
-                    st.markdown(f'<a href="{wa_link}" target="_blank" class="wa-native-btn">Share via WhatsApp</a>', unsafe_allow_html=True)
+                    st.markdown(f'<a href="{wa_link}" target="_blank" class="wa-talabat-btn">📲 Share on WhatsApp</a>', unsafe_allow_html=True)
 
             st.divider()
 
 # 3. HISTORY
 with tab_history:
-    st.markdown(f"##### Transfer Audit Registry ({selected_branch})")
+    st.markdown(f"##### Order History ({selected_branch})")
     all_data = load_data()
     branch_history = [t for t in reversed(all_data) if t["from_branch"] == selected_branch or t["to_branch"] == selected_branch]
     
     if not branch_history:
-        st.info(f"No records logged for terminal {selected_branch}.")
+        st.info(f"No order history for {selected_branch}.")
     else:
         for trx in branch_history:
             v_no = f"ST {253600 + trx['id']}"
             is_out = (trx["from_branch"] == selected_branch)
             direction = f"Outbound to {trx['to_branch']}" if is_out else f"Inbound from {trx['from_branch']}"
-            badge_html = '<span class="chip-received">RECEIVED</span>' if trx['status'] == "RECEIVED" else '<span class="chip-transit">IN TRANSIT</span>'
+            badge_html = '<span class="chip-delivered">DELIVERED</span>' if trx['status'] == "RECEIVED" else '<span class="chip-transit">ON THE WAY</span>'
             
             st.markdown(f"""
-            <div class="native-card">
-                <div class="native-card-header">
-                    <span class="card-title">#{v_no}</span>
+            <div class="talabat-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 15px; font-weight: 800; color: #FFFFFF;">#{v_no}</span>
                     {badge_html}
                 </div>
-                <div style="font-size: 13px; color: #58A6FF; font-weight: 600;">{direction}</div>
-                <div style="font-size: 12px; color: #8B949E; margin-top: 2px;">Issued: {trx['sender_name']} | Received: {trx.get('receiver_name', 'Pending')}</div>
-                <div style="font-size: 11px; color: #6E7681; margin-top: 2px;">Date: {trx['date_str']} {trx['time_str']}</div>
+                <div style="font-size: 13px; color: #FF7A30; font-weight: 700;">{direction}</div>
+                <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">Issued: {trx['sender_name']} | Received: {trx.get('receiver_name', 'Pending')}</div>
+                <div style="font-size: 11px; color: #64748B; margin-top: 2px;">Date: {trx['date_str']} {trx['time_str']}</div>
             </div>
             """, unsafe_allow_html=True)
             
@@ -566,7 +606,7 @@ with tab_history:
                 c1, c2 = st.columns(2)
                 with c1:
                     st.download_button(
-                        label="Download PDF",
+                        label="📄 Download PDF",
                         data=pdf_bytes,
                         file_name=f"Voucher_{v_no.replace(' ', '_')}.pdf",
                         mime="application/pdf",
@@ -578,28 +618,28 @@ with tab_history:
                     wa_msg = (
                         f"*JAMAL SHOWAITER SWEETS Co. W.L.L.*\n"
                         f"*STOCK TRANSFER NOTE*\n\n"
-                        f"*No:* {v_no}\n"
+                        f"*Order No:* {v_no}\n"
                         f"*Date:* {trx['date_str']}\n"
                         f"*From:* {trx['from_branch']}\n"
                         f"*To:* {trx['to_branch']}\n"
                         f"*Issued by:* {trx['sender_name']}\n"
-                        f"*Approved by:* {trx['receiver_name']}\n\n"
+                        f"*Accepted by:* {trx['receiver_name']}\n\n"
                         f"*Items:*\n{wa_items}\n\n"
-                        f"_Official Voucher Verified & Logged._"
+                        f"_Order Verified & Delivered._"
                     )
                     wa_link = f"https://api.whatsapp.com/send?text={urllib.parse.quote(wa_msg)}"
-                    st.markdown(f'<a href="{wa_link}" target="_blank" class="wa-native-btn">Share via WhatsApp</a>', unsafe_allow_html=True)
+                    st.markdown(f'<a href="{wa_link}" target="_blank" class="wa-talabat-btn">📲 WhatsApp</a>', unsafe_allow_html=True)
             st.divider()
 
     if branch_history:
         st.markdown("""
-        <div class="native-card" style="border: 1px solid rgba(248, 81, 73, 0.4); margin-top: 20px;">
-            <div style="font-size: 13.5px; font-weight: 700; color: #F85149;">Data Maintenance</div>
-            <div style="font-size: 12px; color: #8B949E; margin-top: 2px;">Permanently clear stored transfers.</div>
+        <div class="talabat-card" style="border: 1px solid rgba(239, 68, 68, 0.3); margin-top: 20px;">
+            <div style="font-size: 13.5px; font-weight: 700; color: #F87171;">Clear Orders History</div>
+            <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">Permanently delete transfer records.</div>
         </div>
         """, unsafe_allow_html=True)
         
-        confirm_del = st.checkbox(f"Confirm record removal for {selected_branch}", key="confirm_del_box")
+        confirm_del = st.checkbox(f"Confirm deletion for {selected_branch}", key="confirm_del_box")
         col_c1, col_c2 = st.columns(2)
         with col_c1:
             if st.button(f"Clear {selected_branch} Only", use_container_width=True):
@@ -612,10 +652,10 @@ with tab_history:
                     st.rerun()
                     
         with col_c2:
-            if st.button("Clear All Data", use_container_width=True):
+            if st.button("Clear All Orders", use_container_width=True):
                 if not confirm_del:
                     st.warning("Confirmation required.")
                 else:
                     save_data([])
-                    st.success("Global database reset!")
+                    st.success("All data cleared!")
                     st.rerun()
