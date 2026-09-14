@@ -6,18 +6,18 @@ import urllib.parse
 import json
 import os
 
-# Page Settings
+# Page Setup
 st.set_page_config(
-    page_title="STOCK TRANSFER | Jamal Showaiter",
+    page_title="STOCK TRANSFER",
     page_icon="📋",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-# Persistent Storage
-DB_FILE = "stock_transfers_db.json"
+# Persistent Data File
+DB_FILE = "transfers_data.json"
 
-def load_transfers():
+def load_data():
     if os.path.exists(DB_FILE):
         try:
             with open(DB_FILE, "r") as f:
@@ -26,153 +26,124 @@ def load_transfers():
             return []
     return []
 
-def save_transfers(data):
-    with open(DB_FILE, "w") as f:
-        json.dump(data, f, indent=2)
+def save_data(data):
+    try:
+        with open(DB_FILE, "w") as f:
+            json.dump(data, f, indent=2)
+    except Exception:
+        pass
 
-# HIGH DEFINITION ULTRA-DARK THEME + SYSTEM LOCKDOWN CSS
+# Ultra-Clean Dark HD Theme
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600&display=swap');
     
-    * {
-        font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-    }
+    * { font-family: 'Inter', sans-serif; }
     
-    /* SYSTEM LOCKDOWN: Hides edit menus, deployment links, github source, footer */
-    #MainMenu, header, footer, .stDeployButton, [data-testid="stToolbar"] {
-        display: none !important;
-        visibility: hidden !important;
-    }
+    #MainMenu, header, footer { visibility: hidden; }
     
-    /* Deep OLED / Carbon Black Background */
     .stApp {
-        background: radial-gradient(circle at 50% 0%, #0F172A 0%, #020617 100%) !important;
-        color: #F1F5F9 !important;
-    }
-
-    /* HD Corporate Glassmorphic Header */
-    .top-header {
-        background: rgba(15, 23, 42, 0.75);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 22px 18px;
-        border-radius: 16px;
-        margin-bottom: 22px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-        border-left: 4px solid #D97706;
+        background-color: #0B0F19;
+        color: #F3F4F6;
     }
     
-    .company-title {
+    .header-box {
+        background: #111827;
+        border: 1px solid #1F2937;
+        border-left: 4px solid #D97706;
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+    }
+    .comp-name {
         font-size: 11px;
         font-weight: 700;
-        letter-spacing: 1.5px;
         color: #F59E0B;
-        text-transform: uppercase;
-        margin-bottom: 3px;
-        font-family: 'JetBrains Mono', monospace;
+        letter-spacing: 1px;
     }
-    
-    .main-title {
-        font-size: 26px;
+    .app-title {
+        font-size: 22px;
         font-weight: 800;
-        letter-spacing: -0.5px;
-        margin: 0;
         color: #FFFFFF;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        margin: 2px 0 6px 0;
     }
-    
-    .branch-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: rgba(56, 189, 248, 0.1);
-        border: 1px solid rgba(56, 189, 248, 0.3);
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 700;
-        margin-top: 10px;
+    .branch-tag {
+        display: inline-block;
+        background: #1E293B;
+        border: 1px solid #38BDF8;
         color: #38BDF8;
         font-family: 'JetBrains Mono', monospace;
-    }
-
-    /* Dark Cards */
-    .item-card {
-        background: rgba(15, 23, 42, 0.65);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 14px;
-        padding: 16px;
-        margin-bottom: 14px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        font-size: 12px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 15px;
     }
     
-    .badge {
+    .order-card {
+        background: #111827;
+        border: 1px solid #1F2937;
+        padding: 14px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+    }
+    .badge-transit {
+        background: rgba(245, 158, 11, 0.15);
+        color: #FBBF24;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        padding: 2px 8px;
+        border-radius: 6px;
         font-size: 11px;
         font-weight: 700;
-        padding: 4px 10px;
-        border-radius: 6px;
-        text-transform: uppercase;
-        font-family: 'JetBrains Mono', monospace;
     }
-    .badge-transit { 
-        background: rgba(245, 158, 11, 0.15); 
-        color: #FBBF24; 
-        border: 1px solid rgba(245, 158, 11, 0.3);
-    }
-    .badge-received { 
-        background: rgba(34, 197, 94, 0.15); 
-        color: #4ADE80; 
+    .badge-received {
+        background: rgba(34, 197, 94, 0.15);
+        color: #4ADE80;
         border: 1px solid rgba(34, 197, 94, 0.3);
-    }
-
-    /* Dark Theme Inputs */
-    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stSelectbox>div>div {
-        background-color: #090D16 !important;
-        color: #F8FAFC !important;
-        border: 1px solid rgba(255, 255, 255, 0.14) !important;
-        border-radius: 12px !important;
-    }
-    
-    /* Sleek Action Buttons */
-    .stButton>button {
-        border-radius: 12px;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 11px;
         font-weight: 700;
-        font-size: 14px;
-        height: 46px;
-        border: none;
-        transition: all 0.2s ease-in-out;
     }
     
     .wa-btn {
         display: block;
         background: #25D366;
         color: white !important;
-        padding: 11px;
-        border-radius: 12px;
+        text-align: center;
+        padding: 10px;
+        border-radius: 8px;
         text-decoration: none;
         font-weight: 700;
         font-size: 13px;
-        text-align: center;
         margin-top: 6px;
-        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+    }
+    
+    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stSelectbox>div>div {
+        background-color: #030712 !important;
+        color: #FFFFFF !important;
+        border: 1px solid #374151 !important;
+        border-radius: 8px !important;
+    }
+    
+    .stButton>button {
+        border-radius: 8px;
+        font-weight: 700;
+        height: 44px;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# EXACT REAL VOUCHER PDF GENERATOR
-def generate_voucher_pdf(trx):
+# Voucher PDF Generator (Matching Physical Voucher Photo)
+def create_voucher_pdf(trx):
     pdf = FPDF(orientation='P', unit='mm', format='A4')
     pdf.set_auto_page_break(auto=False)
     pdf.add_page()
     
-    # Cream / Paper Voucher Tint
+    # Cream/Yellow Voucher Paper Tint
     pdf.set_fill_color(254, 252, 235)
     pdf.rect(5, 5, 200, 287, "F")
     
-    # 1. Header
+    # Header Details
     pdf.set_xy(10, 10)
     pdf.set_font("Helvetica", "B", 13)
     pdf.set_text_color(20, 20, 20)
@@ -185,7 +156,7 @@ def generate_voucher_pdf(trx):
     pdf.set_font("Helvetica", "B", 11)
     pdf.cell(190, 5, "STOCK TRANSFER NOTE", ln=True, align="C")
     
-    # 2. Serial No & Date
+    # Serial No & Date
     pdf.set_xy(10, 26)
     pdf.set_font("Helvetica", "B", 9.5)
     pdf.write(5, "No: ")
@@ -201,7 +172,7 @@ def generate_voucher_pdf(trx):
     pdf.set_font("Helvetica", "", 9)
     pdf.cell(38, 5, f" {trx['date_str']}", border="B")
     
-    # 3. From / To Location
+    # Locations
     pdf.set_xy(10, 33)
     pdf.set_font("Helvetica", "B", 9)
     pdf.cell(26, 5, "From Location: ")
@@ -214,7 +185,7 @@ def generate_voucher_pdf(trx):
     pdf.set_font("Helvetica", "", 9)
     pdf.cell(158, 5, f" {trx['to_branch']}", border="B")
     
-    # 4. Table Header
+    # Columns
     widths = [10, 18, 74, 14, 22, 22, 30]
     headers = ["S.No.", "Date", "Description", "Qty", "Selling Price", "Unit Price", "Amount (BD)"]
     
@@ -227,7 +198,7 @@ def generate_voucher_pdf(trx):
         pdf.cell(widths[i], 7, headers[i], border=1, align="C", fill=True)
     pdf.ln()
     
-    # 5. Table Rows (Up to 14 rows)
+    # 14 Grid Rows
     items = trx.get("items_list", [])
     row_height = 8
     pdf.set_font("Helvetica", "", 8)
@@ -248,14 +219,14 @@ def generate_voucher_pdf(trx):
                 pdf.cell(w, row_height, "", border=1)
         pdf.ln()
         
-    # 6. Total Amount
+    # Total Amount
     pdf.set_x(10)
     pdf.set_font("Helvetica", "B", 9)
     pdf.cell(160, 7.5, "Total Amount  ", border=1, align="R")
     pdf.cell(30, 7.5, trx.get("total_amount", ""), border=1, align="C")
     pdf.ln(12)
     
-    # 7. Issued by & Approved by
+    # Signatures
     pdf.set_x(10)
     pdf.set_font("Helvetica", "B", 9)
     pdf.cell(20, 5, "Issued by: ")
@@ -270,7 +241,7 @@ def generate_voucher_pdf(trx):
     
     return bytes(pdf.output())
 
-# SYSTEM BRANCHES
+# Branch List
 BRANCHES = [
     "KSSFCT-01",
     "KSSF-01",
@@ -280,35 +251,30 @@ BRANCHES = [
     "JSSF-02"
 ]
 
-# Locked Branch Detection from URL
+# Get branch from URL if provided, otherwise default to first branch
 query_params = st.query_params
-locked_branch = None
+selected_branch = BRANCHES[0]
 
 if "b" in query_params:
-    input_b = query_params["b"].strip().upper()
-    if input_b in BRANCHES:
-        locked_branch = input_b
+    val = query_params["b"].strip().upper()
+    if val in BRANCHES:
+        selected_branch = val
 
-# If URL has no branch parameter, show security lock notice
-if not locked_branch:
-    st.markdown("""
-    <div class="top-header">
-        <div class="company-title">Jamal Showaiter Sweets Co. W.L.L.</div>
-        <div class="main-title">STOCK TRANSFER</div>
-        <div class="branch-badge">🔒 AUTHENTICATION REQUIRED</div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.warning("⚠️ Access Denied: Please use your designated branch portal link to operate.")
-    st.stop()
-
-# LOCKED BRANCH ACTIVE VIEW
+# Top Header
 st.markdown(f"""
-<div class="top-header">
-    <div class="company-title">Jamal Showaiter Sweets Co. W.L.L.</div>
-    <div class="main-title">STOCK TRANSFER</div>
-    <div class="branch-badge">🔒 TERMINAL: {locked_branch}</div>
+<div class="header-box">
+    <div class="comp-name">JAMAL SHOWAITER SWEETS CO. W.L.L.</div>
+    <div class="app-title">STOCK TRANSFER</div>
+    <div class="branch-tag">LOCATION: {selected_branch}</div>
 </div>
 """, unsafe_allow_html=True)
+
+# If no URL parameter was given, allow switching branch from sidebar easily
+if "b" not in query_params:
+    new_branch = st.sidebar.selectbox("Active Branch:", BRANCHES, index=BRANCHES.index(selected_branch))
+    if new_branch != selected_branch:
+        st.query_params["b"] = new_branch
+        st.rerun()
 
 tab_dispatch, tab_inbox, tab_history = st.tabs([
     "📤 Dispatch Stock", 
@@ -318,57 +284,55 @@ tab_dispatch, tab_inbox, tab_history = st.tabs([
 
 api_key = st.secrets.get("GEMINI_API_KEY", "")
 
-# 1. DISPATCH TAB
+# 1. DISPATCH
 with tab_dispatch:
-    st.markdown("#### 📤 Initiate Transfer Note")
-    
-    other_branches = [b for b in BRANCHES if b != locked_branch]
-    to_branch = st.selectbox("Destination Location:", other_branches)
-    sender_name = st.text_input("Issued by (Staff Name):", placeholder="Officer Name")
-    items_raw = st.text_area(
-        "Manifest Details (Items & Qty):",
-        placeholder="e.g.:\nHalwa Red King - 10 kg\nVIP Baklava - 5 boxes\nKaju Katli - 2 kg",
+    st.markdown("##### 📤 Create Stock Transfer")
+    other_branches = [b for b in BRANCHES if b != selected_branch]
+    to_loc = st.selectbox("Transfer To (Destination):", other_branches)
+    issuer = st.text_input("Issued by (Staff Name):", placeholder="Your Name")
+    items_input = st.text_area(
+        "Items and Quantities:", 
+        placeholder="e.g.:\nHalwa Red King - 10 kg\nMixed Baklava VIP - 5 boxes\nKaju Katli - 2 kg",
         height=120
     )
     
-    if st.button("🚀 Transmit Stock Transfer Note", use_container_width=True, type="primary"):
-        if not sender_name.strip():
-            st.warning("Staff signature required in 'Issued by'.")
-        elif not items_raw.strip():
-            st.warning("Item details cannot be empty.")
+    if st.button("🚀 Issue Transfer Note", use_container_width=True, type="primary"):
+        if not issuer.strip():
+            st.warning("Please type your name in 'Issued by'.")
+        elif not items_input.strip():
+            st.warning("Please enter items to transfer.")
         else:
-            with st.spinner("Encrypting & Formatting Voucher..."):
+            with st.spinner("Creating Transfer Note..."):
                 parsed_list = []
+                # Simple parsing fallback so it never fails
                 if api_key:
                     try:
                         client = genai.Client(api_key=api_key)
                         prompt = (
-                            "Parse these inventory items into a strict JSON array. Format: "
-                            '[{"desc": "Item Name", "qty": "10 kg", "sp": "", "up": "", "amt": ""}]. '
-                            'Output ONLY JSON without formatting tags:\n' + items_raw
+                            "Extract items to JSON array with fields 'desc' and 'qty'. Example: "
+                            '[{"desc": "Halwa Red", "qty": "10 kg", "sp": "", "up": "", "amt": ""}]. '
+                            'Only output raw JSON without markdown:\n' + items_input
                         )
-                        for m in ['gemini-2.5-flash', 'gemini-1.5-flash']:
-                            try:
-                                res = client.models.generate_content(model=m, contents=prompt)
-                                clean_json = res.text.strip().replace("```json", "").replace("```", "").strip()
-                                parsed_list = json.loads(clean_json)
-                                break
-                            except Exception:
-                                continue
+                        res = client.models.generate_content(
+                            model='gemini-2.5-flash',
+                            contents=prompt
+                        )
+                        clean_text = res.text.strip().replace("```json", "").replace("```", "").strip()
+                        parsed_list = json.loads(clean_text)
                     except Exception:
-                        pass
-                        
+                        parsed_list = []
+                
                 if not parsed_list:
-                    lines = [l.strip() for l in items_raw.split("\n") if l.strip()]
+                    lines = [l.strip() for l in items_input.split("\n") if l.strip()]
                     parsed_list = [{"desc": l, "qty": "", "sp": "", "up": "", "amt": ""} for l in lines]
-                    
-                all_transfers = load_transfers()
+                
+                all_data = load_data()
                 now = datetime.datetime.now()
                 new_trx = {
-                    "id": len(all_transfers) + 1,
-                    "from_branch": locked_branch,
-                    "to_branch": to_branch,
-                    "sender_name": sender_name,
+                    "id": len(all_data) + 1,
+                    "from_branch": selected_branch,
+                    "to_branch": to_loc,
+                    "sender_name": issuer,
                     "receiver_name": "",
                     "items_list": parsed_list,
                     "total_amount": "",
@@ -376,120 +340,109 @@ with tab_dispatch:
                     "date_str": now.strftime("%d/%m/%Y"),
                     "time_str": now.strftime("%H:%M")
                 }
-                all_transfers.append(new_trx)
-                save_transfers(all_transfers)
-                st.success(f"Voucher ST {253600 + new_trx['id']} logged & transmitted to {to_branch}!")
+                all_data.append(new_trx)
+                save_data(all_data)
+                st.success(f"Voucher ST {253600 + new_trx['id']} created and sent to {to_loc}!")
                 st.rerun()
 
-# 2. INBOX TAB
+# 2. INCOMING
 with tab_inbox:
-    st.markdown(f"#### 📥 Incoming Deliveries ({locked_branch})")
-    all_transfers = load_transfers()
-    
-    incoming = [t for t in reversed(all_transfers) if t["to_branch"] == locked_branch and t["status"] == "IN TRANSIT"]
+    st.markdown(f"##### 📥 Incoming to {selected_branch}")
+    all_data = load_data()
+    incoming = [t for t in reversed(all_data) if t["to_branch"] == selected_branch and t["status"] == "IN TRANSIT"]
     
     if not incoming:
-        st.info(f"No pending transfers arriving at {locked_branch}.")
+        st.info(f"No pending incoming stock for {selected_branch}.")
     else:
         for trx in incoming:
-            voucher_no = f"ST {253600 + trx['id']}"
-            with st.container():
-                st.markdown(f"""
-                <div class="item-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-weight: 700; color: #38BDF8; font-size: 15px;">No: {voucher_no}</span>
-                        <span class="badge badge-transit">⏳ IN TRANSIT</span>
-                    </div>
-                    <div style="font-size: 13px; color: #94A3B8; margin-top: 4px;">
-                        Origin: <b>{trx['from_branch']}</b> | Issued by: <b>{trx['sender_name']}</b>
-                    </div>
-                    <div style="font-size: 11px; color: #64748B;">
-                        Dispatched: {trx['date_str']} at {trx['time_str']}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                for itm in trx['items_list']:
-                    st.caption(f"• **{itm.get('desc')}** — Qty: {itm.get('qty', 'N/A')}")
-                    
-                rec_name = st.text_input("Approved by (Your Signature):", key=f"rec_{trx['id']}", placeholder="Receiver Name")
-                if st.button(f"✅ Accept & Sign Voucher #{trx['id']}", key=f"btn_rec_{trx['id']}", use_container_width=True, type="primary"):
-                    if not rec_name.strip():
-                        st.warning("Receiver name signature required.")
-                    else:
-                        for item in all_transfers:
-                            if item["id"] == trx["id"]:
-                                item["status"] = "RECEIVED"
-                                item["receiver_name"] = rec_name
-                                item["received_date"] = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
-                                break
-                        save_transfers(all_transfers)
-                        st.success("Transfer confirmed and signed!")
-                        st.rerun()
-                st.divider()
-
-# 3. HISTORY TAB (LOCKED TO THIS BRANCH ONLY)
-with tab_history:
-    st.markdown(f"#### 📜 Terminal History: {locked_branch}")
-    st.caption("Immutable record of dispatches and receipts.")
-    
-    all_transfers = load_transfers()
-    branch_history = [t for t in reversed(all_transfers) if t["from_branch"] == locked_branch or t["to_branch"] == locked_branch]
-    
-    if not branch_history:
-        st.info(f"No history logged for terminal {locked_branch}.")
-    else:
-        for trx in branch_history:
-            voucher_no = f"ST {253600 + trx['id']}"
-            is_outgoing = (trx["from_branch"] == locked_branch)
-            direction = f"📤 Sent to {trx['to_branch']}" if is_outgoing else f"📥 Received from {trx['from_branch']}"
-            badge_cls = "badge-received" if trx['status'] == "RECEIVED" else "badge-transit"
-            
+            v_no = f"ST {253600 + trx['id']}"
             st.markdown(f"""
-            <div class="item-card">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-weight: 700; color: #F8FAFC; font-size: 14px;">No: {voucher_no}</span>
-                    <span class="badge {badge_cls}">{trx['status']}</span>
+            <div class="order-card">
+                <div style="display: flex; justify-content: space-between;">
+                    <b>No: {v_no}</b>
+                    <span class="badge-transit">⏳ IN TRANSIT</span>
                 </div>
-                <div style="font-size: 13px; font-weight: 600; color: #38BDF8; margin-top: 4px;">
-                    {direction}
+                <div style="font-size: 13px; color: #9CA3AF; margin-top: 4px;">
+                    From: <b>{trx['from_branch']}</b> | Sent by: <b>{trx['sender_name']}</b>
                 </div>
-                <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">
-                    Issued: <b>{trx['sender_name']}</b> | Approved: <b>{trx.get('receiver_name', 'Pending')}</b>
-                </div>
-                <div style="font-size: 11px; color: #64748B;">
+                <div style="font-size: 11px; color: #6B7280;">
                     Date: {trx['date_str']} {trx['time_str']}
                 </div>
             </div>
             """, unsafe_allow_html=True)
             
+            for it in trx['items_list']:
+                st.caption(f"• **{it.get('desc')}** — Qty: {it.get('qty', 'N/A')}")
+                
+            rec_name = st.text_input("Approved by (Your Name):", key=f"r_{trx['id']}", placeholder="Receiver Name")
+            if st.button(f"✅ Accept Stock #{trx['id']}", key=f"btn_{trx['id']}", use_container_width=True, type="primary"):
+                if not rec_name.strip():
+                    st.warning("Please type your name in 'Approved by'.")
+                else:
+                    for item in all_data:
+                        if item["id"] == trx["id"]:
+                            item["status"] = "RECEIVED"
+                            item["receiver_name"] = rec_name
+                            break
+                    save_data(all_data)
+                    st.success("Stock received successfully!")
+                    st.rerun()
+            st.divider()
+
+# 3. HISTORY
+with tab_history:
+    st.markdown(f"##### 📜 History for {selected_branch}")
+    all_data = load_data()
+    branch_history = [t for t in reversed(all_data) if t["from_branch"] == selected_branch or t["to_branch"] == selected_branch]
+    
+    if not branch_history:
+        st.info(f"No history records found for {selected_branch}.")
+    else:
+        for trx in branch_history:
+            v_no = f"ST {253600 + trx['id']}"
+            is_out = (trx["from_branch"] == selected_branch)
+            direction = f"📤 Sent to {trx['to_branch']}" if is_out else f"📥 Received from {trx['from_branch']}"
+            badge_html = '<span class="badge-received">✅ RECEIVED</span>' if trx['status'] == "RECEIVED" else '<span class="badge-transit">⏳ IN TRANSIT</span>'
+            
+            st.markdown(f"""
+            <div class="order-card">
+                <div style="display: flex; justify-content: space-between;">
+                    <b>No: {v_no}</b>
+                    {badge_html}
+                </div>
+                <div style="font-size: 13px; color: #38BDF8; margin-top: 4px;">{direction}</div>
+                <div style="font-size: 12px; color: #9CA3AF;">Issued: {trx['sender_name']} | Approved: {trx.get('receiver_name', 'Pending')}</div>
+                <div style="font-size: 11px; color: #6B7280;">Date: {trx['date_str']} {trx['time_str']}</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
             if trx['status'] == "RECEIVED":
-                pdf_bytes = generate_voucher_pdf(trx)
-                col1, col2 = st.columns(2)
-                with col1:
+                pdf_bytes = create_voucher_pdf(trx)
+                c1, c2 = st.columns(2)
+                with c1:
                     st.download_button(
                         label="📄 Download PDF",
                         data=pdf_bytes,
-                        file_name=f"Voucher_{voucher_no.replace(' ', '_')}.pdf",
+                        file_name=f"Voucher_{v_no.replace(' ', '_')}.pdf",
                         mime="application/pdf",
                         key=f"dl_{trx['id']}",
                         use_container_width=True
                     )
-                with col2:
+                with c2:
                     wa_items = "\n".join([f"- {it.get('desc')} ({it.get('qty')})" for it in trx['items_list']])
                     wa_msg = (
                         f"*JAMAL SHOWAITER SWEETS Co. W.L.L.*\n"
                         f"*STOCK TRANSFER NOTE*\n\n"
-                        f"*No:* {voucher_no}\n"
+                        f"*No:* {v_no}\n"
                         f"*Date:* {trx['date_str']}\n"
-                        f"*From Location:* {trx['from_branch']}\n"
-                        f"*To Location:* {trx['to_branch']}\n"
+                        f"*From:* {trx['from_branch']}\n"
+                        f"*To:* {trx['to_branch']}\n"
                         f"*Issued by:* {trx['sender_name']}\n"
                         f"*Approved by:* {trx['receiver_name']}\n\n"
                         f"*Items:*\n{wa_items}\n\n"
-                        f"_Official Voucher Verified & Logged._"
+                        f"_Transfer Verified & Received._"
                     )
                     wa_link = f"https://api.whatsapp.com/send?text={urllib.parse.quote(wa_msg)}"
                     st.markdown(f'<a href="{wa_link}" target="_blank" class="wa-btn">📲 WhatsApp</a>', unsafe_allow_html=True)
             st.divider()
-            
+                                         
