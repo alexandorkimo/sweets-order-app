@@ -251,7 +251,6 @@ BRANCHES = [
     "JSSF-02"
 ]
 
-# Get branch from URL if provided, otherwise default to first branch
 query_params = st.query_params
 selected_branch = BRANCHES[0]
 
@@ -269,7 +268,6 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# If no URL parameter was given, allow switching branch from sidebar easily
 if "b" not in query_params:
     new_branch = st.sidebar.selectbox("Active Branch:", BRANCHES, index=BRANCHES.index(selected_branch))
     if new_branch != selected_branch:
@@ -284,7 +282,7 @@ tab_dispatch, tab_inbox, tab_history = st.tabs([
 
 api_key = st.secrets.get("GEMINI_API_KEY", "")
 
-# 1. DISPATCH
+# 1. DISPATCH TAB
 with tab_dispatch:
     st.markdown("##### 📤 Create Stock Transfer")
     other_branches = [b for b in BRANCHES if b != selected_branch]
@@ -304,7 +302,6 @@ with tab_dispatch:
         else:
             with st.spinner("Creating Transfer Note..."):
                 parsed_list = []
-                # Simple parsing fallback so it never fails
                 if api_key:
                     try:
                         client = genai.Client(api_key=api_key)
@@ -336,60 +333,99 @@ with tab_dispatch:
                     "receiver_name": "",
                     "items_list": parsed_list,
                     "total_amount": "",
-                    "status": "IN TRANSIT",
+                    "status": "IN TRANSIT", # Strictly Pending until manually accepted
                     "date_str": now.strftime("%d/%m/%Y"),
                     "time_str": now.strftime("%H:%M")
                 }
                 all_data.append(new_trx)
                 save_data(all_data)
-                st.success(f"Voucher ST {253600 + new_trx['id']} created and sent to {to_loc}!")
+                st.success(f"Voucher ST {253600 + new_trx['id']} created and dispatched to {to_loc}!")
                 st.rerun()
 
-# 2. INCOMING
+# 2. INCOMING TAB (MANUAL ACCEPT ONLY + IMMEDIATE PDF RECEIPT)
 with tab_inbox:
-    st.markdown(f"##### 📥 Incoming to {selected_branch}")
+    st.markdown(f"##### 📥 Incoming Stock for {selected_branch}")
     all_data = load_data()
-    incoming = [t for t in reversed(all_data) if t["to_branch"] == selected_branch and t["status"] == "IN TRANSIT"]
     
-    if not incoming:
+    # Fetch pending incoming items strictly for this branch
+    incoming_pending = [t for t in reversed(all_data) if t["to_branch"] == selected_branch and t["status"] == "IN TRANSIT"]
+    
+    if not incoming_pending:
         st.info(f"No pending incoming stock for {selected_branch}.")
     else:
-        for trx in incoming:
+        for trx in incoming_pending:
             v_no = f"ST {253600 + trx['id']}"
             st.markdown(f"""
             <div class="order-card">
-                <div style="display: flex; justify-content: space-between;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
                     <b>No: {v_no}</b>
-                    <span class="badge-transit">⏳ IN TRANSIT</span>
+                    <span class="badge-transit">⏳ PENDING ACCEPTANCE</span>
                 </div>
                 <div style="font-size: 13px; color: #9CA3AF; margin-top: 4px;">
                     From: <b>{trx['from_branch']}</b> | Sent by: <b>{trx['sender_name']}</b>
                 </div>
                 <div style="font-size: 11px; color: #6B7280;">
-                    Date: {trx['date_str']} {trx['time_str']}
+                    Dispatched: {trx['date_str']} at {trx['time_str']}
                 </div>
             </div>
             """, unsafe_allow_html=True)
             
+            st.markdown("**Items Manifest:**")
             for it in trx['items_list']:
                 st.caption(f"• **{it.get('desc')}** — Qty: {it.get('qty', 'N/A')}")
                 
-            rec_name = st.text_input("Approved by (Your Name):", key=f"r_{trx['id']}", placeholder="Receiver Name")
-            if st.button(f"✅ Accept Stock #{trx['id']}", key=f"btn_{trx['id']}", use_container_width=True, type="primary"):
+            rec_name = st.text_input("Approved by (Receiver Signature):", key=f"rec_sig_{trx['id']}", placeholder="Type your name here...")
+            
+            # Manual Accept button
+            if st.button(f"✅ Accept & Sign Voucher #{trx['id']}", key=f"btn_accept_{trx['id']}", use_container_width=True, type="primary"):
                 if not rec_name.strip():
-                    st.warning("Please type your name in 'Approved by'.")
+                    st.warning("⚠️ Signature required: Please enter your name in 'Approved by' to accept stock.")
                 else:
                     for item in all_data:
                         if item["id"] == trx["id"]:
                             item["status"] = "RECEIVED"
-                            item["receiver_name"] = rec_name
+                            item["receiver_name"] = rec_name.strip()
+                            item["received_date"] = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
                             break
                     save_data(all_data)
-                    st.success("Stock received successfully!")
+                    st.session_state[f"accepted_{trx['id']}"] = True
+                    st.success(f"Stock Voucher #{trx['id']} successfully accepted and verified by {rec_name}!")
                     st.rerun()
+
+            # Show Instant Download & WhatsApp immediately after accept
+            if st.session_state.get(f"accepted_{trx['id']}", False) or trx["status"] == "RECEIVED":
+                st.success("🎉 Receipt Verified! Download official voucher below:")
+                pdf_bytes = create_voucher_pdf(trx)
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.download_button(
+                        label="📄 Download Voucher PDF",
+                        data=pdf_bytes,
+                        file_name=f"Voucher_{v_no.replace(' ', '_')}.pdf",
+                        mime="application/pdf",
+                        key=f"dl_instant_{trx['id']}",
+                        use_container_width=True
+                    )
+                with col2:
+                    wa_items = "\n".join([f"- {it.get('desc')} ({it.get('qty')})" for it in trx['items_list']])
+                    wa_msg = (
+                        f"*JAMAL SHOWAITER SWEETS Co. W.L.L.*\n"
+                        f"*STOCK TRANSFER NOTE*\n\n"
+                        f"*No:* {v_no}\n"
+                        f"*Date:* {trx['date_str']}\n"
+                        f"*From:* {trx['from_branch']}\n"
+                        f"*To:* {trx['to_branch']}\n"
+                        f"*Issued by:* {trx['sender_name']}\n"
+                        f"*Approved by:* {trx['receiver_name']}\n\n"
+                        f"*Items Verified:*\n{wa_items}\n\n"
+                        f"_Transfer Verified & Received Successfully._"
+                    )
+                    wa_link = f"https://api.whatsapp.com/send?text={urllib.parse.quote(wa_msg)}"
+                    st.markdown(f'<a href="{wa_link}" target="_blank" class="wa-btn">📲 Share on WhatsApp</a>', unsafe_allow_html=True)
+
             st.divider()
 
-# 3. HISTORY
+# 3. HISTORY TAB
 with tab_history:
     st.markdown(f"##### 📜 History for {selected_branch}")
     all_data = load_data()
@@ -416,6 +452,7 @@ with tab_history:
             </div>
             """, unsafe_allow_html=True)
             
+            # PDF & WhatsApp buttons for accepted transfers
             if trx['status'] == "RECEIVED":
                 pdf_bytes = create_voucher_pdf(trx)
                 c1, c2 = st.columns(2)
@@ -425,7 +462,7 @@ with tab_history:
                         data=pdf_bytes,
                         file_name=f"Voucher_{v_no.replace(' ', '_')}.pdf",
                         mime="application/pdf",
-                        key=f"dl_{trx['id']}",
+                        key=f"dl_hist_{trx['id']}",
                         use_container_width=True
                     )
                 with c2:
@@ -445,4 +482,4 @@ with tab_history:
                     wa_link = f"https://api.whatsapp.com/send?text={urllib.parse.quote(wa_msg)}"
                     st.markdown(f'<a href="{wa_link}" target="_blank" class="wa-btn">📲 WhatsApp</a>', unsafe_allow_html=True)
             st.divider()
-                                         
+                        
