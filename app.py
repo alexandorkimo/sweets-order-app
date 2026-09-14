@@ -423,5 +423,181 @@ with tab_dispatch:
                             model='gemini-2.5-flash',
                             contents=prompt
                         )
-                        clean_text = res.text.strip().replace("```json", "").replace("
-                        
+                        clean_text = res.text.strip().replace("```json", "").replace("```", "").strip()
+                        parsed_list = json.loads(clean_text)
+                    except Exception:
+                        parsed_list = []
+                
+                if not parsed_list:
+                    lines = [l.strip() for l in items_input.split("\n") if l.strip()]
+                    parsed_list = [{"desc": l, "qty": "", "sp": "", "up": "", "amt": ""} for l in lines]
+                
+                all_data = load_data()
+                now = datetime.datetime.now()
+                new_trx = {
+                    "id": len(all_data) + 1,
+                    "from_branch": selected_branch,
+                    "to_branch": to_loc,
+                    "sender_name": issuer,
+                    "receiver_name": "",
+                    "items_list": parsed_list,
+                    "total_amount": "",
+                    "status": "IN TRANSIT",
+                    "date_str": now.strftime("%d/%m/%Y"),
+                    "time_str": now.strftime("%H:%M")
+                }
+                all_data.append(new_trx)
+                save_data(all_data)
+                st.session_state["last_issued"] = new_trx
+
+    if "last_issued" in st.session_state:
+        last = st.session_state["last_issued"]
+        st.markdown(f"""
+        <div class="success-box">
+            <div style="font-size: 15px; font-weight: 800; color: #34D399; margin-bottom: 4px;">
+                ✅ TRANSFER NOTE ISSUED SUCCESSFULLY!
+            </div>
+            <div style="font-size: 13px; color: #F8FAFC; margin-bottom: 6px;">
+                Voucher <b>ST {253600 + last['id']}</b> logged and dispatched to <b>{last['to_branch']}</b>.
+            </div>
+            <div style="font-size: 12px; color: #94A3B8; font-family: 'JetBrains Mono', monospace;">
+                Issued by: {last['sender_name']} | Time: {last['date_str']} {last['time_str']}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# 2. INCOMING TAB
+with tab_inbox:
+    st.markdown(f"##### 📥 Incoming Deliveries ({selected_branch})")
+    all_data = load_data()
+    incoming_pending = [t for t in reversed(all_data) if t["to_branch"] == selected_branch and t["status"] == "IN TRANSIT"]
+    
+    if not incoming_pending:
+        st.info(f"No pending transfers arriving at {selected_branch}.")
+    else:
+        for trx in incoming_pending:
+            v_no = f"ST {253600 + trx['id']}"
+            st.markdown(f"""
+            <div class="order-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <b style="font-size: 15px; color: #38BDF8;">No: {v_no}</b>
+                    <span class="badge-transit">⏳ PENDING ACCEPTANCE</span>
+                </div>
+                <div style="font-size: 13px; color: #CBD5E1; margin-top: 6px;">
+                    Origin: <b>{trx['from_branch']}</b> | Dispatched by: <b>{trx['sender_name']}</b>
+                </div>
+                <div style="font-size: 11px; color: #64748B; font-family: 'JetBrains Mono';">
+                    Time: {trx['date_str']} at {trx['time_str']}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("**Manifest Items:**")
+            for it in trx['items_list']:
+                st.caption(f"• **{it.get('desc')}** — Qty: {it.get('qty', 'N/A')}")
+                
+            rec_name = st.text_input("Approved by (Receiver Signature):", key=f"rec_sig_{trx['id']}", placeholder="Type your name here...")
+            
+            if st.button(f"✅ Accept & Sign Voucher #{trx['id']}", key=f"btn_accept_{trx['id']}", use_container_width=True, type="primary"):
+                if not rec_name.strip():
+                    st.warning("⚠️ Receiver signature required.")
+                else:
+                    for item in all_data:
+                        if item["id"] == trx["id"]:
+                            item["status"] = "RECEIVED"
+                            item["receiver_name"] = rec_name.strip()
+                            item["received_date"] = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
+                            break
+                    save_data(all_data)
+                    st.session_state[f"accepted_{trx['id']}"] = True
+                    st.success(f"Stock Voucher #{trx['id']} verified by {rec_name}!")
+                    st.rerun()
+
+            if st.session_state.get(f"accepted_{trx['id']}", False) or trx["status"] == "RECEIVED":
+                st.success("🎉 Receipt Verified! Download official voucher below:")
+                pdf_bytes = create_voucher_pdf(trx)
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.download_button(
+                        label="📄 Download Voucher PDF",
+                        data=pdf_bytes,
+                        file_name=f"Voucher_{v_no.replace(' ', '_')}.pdf",
+                        mime="application/pdf",
+                        key=f"dl_instant_{trx['id']}",
+                        use_container_width=True
+                    )
+                with col2:
+                    wa_items = "\n".join([f"- {it.get('desc')} ({it.get('qty')})" for it in trx['items_list']])
+                    wa_msg = (
+                        f"*JAMAL SHOWAITER SWEETS Co. W.L.L.*\n"
+                        f"*STOCK TRANSFER NOTE*\n\n"
+                        f"*No:* {v_no}\n"
+                        f"*Date:* {trx['date_str']}\n"
+                        f"*From:* {trx['from_branch']}\n"
+                        f"*To:* {trx['to_branch']}\n"
+                        f"*Issued by:* {trx['sender_name']}\n"
+                        f"*Approved by:* {trx['receiver_name']}\n\n"
+                        f"*Items Verified:*\n{wa_items}\n\n"
+                        f"_Transfer Verified & Received Successfully._"
+                    )
+                    wa_link = f"https://api.whatsapp.com/send?text={urllib.parse.quote(wa_msg)}"
+                    st.markdown(f'<a href="{wa_link}" target="_blank" class="wa-btn">📲 WhatsApp Share</a>', unsafe_allow_html=True)
+
+            st.divider()
+
+# 3. HISTORY TAB
+with tab_history:
+    st.markdown(f"##### 📜 Transfer History ({selected_branch})")
+    all_data = load_data()
+    branch_history = [t for t in reversed(all_data) if t["from_branch"] == selected_branch or t["to_branch"] == selected_branch]
+    
+    if not branch_history:
+        st.info(f"No records found for terminal {selected_branch}.")
+    else:
+        for trx in branch_history:
+            v_no = f"ST {253600 + trx['id']}"
+            is_out = (trx["from_branch"] == selected_branch)
+            direction = f"📤 Sent to {trx['to_branch']}" if is_out else f"📥 Received from {trx['from_branch']}"
+            badge_html = '<span class="badge-received">✅ RECEIVED</span>' if trx['status'] == "RECEIVED" else '<span class="badge-transit">⏳ IN TRANSIT</span>'
+            
+            st.markdown(f"""
+            <div class="order-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <b style="font-size: 15px; color: #F8FAFC;">No: {v_no}</b>
+                    {badge_html}
+                </div>
+                <div style="font-size: 13px; color: #38BDF8; margin-top: 4px; font-weight: 600;">{direction}</div>
+                <div style="font-size: 12px; color: #94A3B8;">Issued: <b>{trx['sender_name']}</b> | Approved: <b>{trx.get('receiver_name', 'Pending')}</b></div>
+                <div style="font-size: 11px; color: #64748B; font-family: 'JetBrains Mono';">Date: {trx['date_str']} {trx['time_str']}</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            if trx['status'] == "RECEIVED":
+                pdf_bytes = create_voucher_pdf(trx)
+                c1, c2 = st.columns(2)
+                with c1:
+                    st.download_button(
+                        label="📄 Download PDF",
+                        data=pdf_bytes,
+                        file_name=f"Voucher_{v_no.replace(' ', '_')}.pdf",
+                        mime="application/pdf",
+                        key=f"dl_hist_{trx['id']}",
+                        use_container_width=True
+                    )
+                with c2:
+                    wa_items = "\n".join([f"- {it.get('desc')} ({it.get('qty')})" for it in trx['items_list']])
+                    wa_msg = (
+                        f"*JAMAL SHOWAITER SWEETS Co. W.L.L.*\n"
+                        f"*STOCK TRANSFER NOTE*\n\n"
+                        f"*No:* {v_no}\n"
+                        f"*Date:* {trx['date_str']}\n"
+                        f"*From:* {trx['from_branch']}\n"
+                        f"*To:* {trx['to_branch']}\n"
+                        f"*Issued by:* {trx['sender_name']}\n"
+                        f"*Approved by:* {trx['receiver_name']}\n\n"
+                        f"*Items:*\n{wa_items}\n\n"
+                        f"_Official Voucher Verified & Logged._"
+                    )
+                    wa_link = f"https://api.whatsapp.com/send?text={urllib.parse.quote(wa_msg)}"
+                    st.markdown(f'<a href="{wa_link}" target="_blank" class="wa-btn">📲 WhatsApp</a>', unsafe_allow_html=True)
+            st.divider()
