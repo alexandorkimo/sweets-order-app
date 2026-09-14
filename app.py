@@ -4,6 +4,7 @@ from fpdf import FPDF
 import datetime
 import urllib.parse
 
+# Page Configuration
 st.set_page_config(
     page_title="Inter-Branch Transfer Hub",
     page_icon="⚡",
@@ -11,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom High-End Cyberpunk Dark Style
+# Custom High-End Cyberpunk Dark Style with 3D Hologram
 custom_css = """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
@@ -34,7 +35,7 @@ custom_css = """
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 80px;
+        height: 85px;
         perspective: 900px;
         margin: 5px 0 15px 0;
     }
@@ -52,7 +53,7 @@ custom_css = """
         height: 45px;
         background: rgba(14, 165, 233, 0.12);
         border: 1.5px solid #38BDF8;
-        box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+        box-shadow: 0 0 15px rgba(56, 189, 248, 0.5), inset 0 0 10px rgba(56, 189, 248, 0.3);
     }
     
     .face-front  { transform: rotateY(0deg) translateZ(22.5px); }
@@ -137,20 +138,35 @@ custom_css = """
         margin-top: 6px;
         box-shadow: 0 0 12px rgba(37, 211, 102, 0.3);
     }
+    
+    .stTextInput>div>div>input, .stTextArea>div>div>textarea {
+        background-color: #0F172A !important;
+        color: #F8FAFC !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 12px !important;
+    }
+    
+    .stButton>button {
+        border-radius: 12px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+        color: #FFFFFF;
+        border: 1px solid rgba(56, 189, 248, 0.5);
+    }
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# Helper Function: Generate PDF Transfer Note
+# Helper Function: PDF Generator
 def generate_pdf(transfer_data):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Helvetica", "B", 16)
     
-    # Title
+    # Title Header
     pdf.cell(0, 10, "INTER-BRANCH STOCK TRANSFER NOTE", ln=True, align="C")
     pdf.set_font("Helvetica", "", 10)
-    pdf.cell(0, 6, "Official Dispatch & Receipt Confirmation", ln=True, align="C")
+    pdf.cell(0, 6, "Official Dispatch & Receipt Confirmation Voucher", ln=True, align="C")
     pdf.ln(5)
     
     # Metadata Box
@@ -201,11 +217,12 @@ def generate_pdf(transfer_data):
     pdf.cell(0, 8, "Itemized Inventory Manifest:", ln=True)
     
     pdf.set_font("Helvetica", "", 10)
-    pdf.multi_cell(0, 6, transfer_data['parsed_items'])
+    clean_lines = transfer_data['parsed_items'].replace("*", "")
+    pdf.multi_cell(0, 6, clean_lines)
     
     pdf.ln(10)
     pdf.set_font("Helvetica", "I", 9)
-    pdf.cell(0, 6, "System-verified transfer confirmation token. Valid across logistics inventory records.", ln=True, align="C")
+    pdf.cell(0, 6, "Verified inter-branch transaction receipt. Valid for physical inventory reconciliations.", ln=True, align="C")
     
     return bytes(pdf.output())
 
@@ -217,7 +234,7 @@ if not api_key:
 if "transfers" not in st.session_state:
     st.session_state.transfers = []
 
-# 3D Animation Header
+# 3D Rotating Animated Hologram
 st.markdown("""
 <div class="hologram-stage">
     <div class="cube-container">
@@ -231,6 +248,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# Main Branding Header
 st.markdown("""
 <div class="brand-banner">
     <h1 class="brand-title">INTER-BRANCH TRANSFER NETWORK</h1>
@@ -261,7 +279,7 @@ if mode == "📤 Dispatch Item (Source)":
     
     if st.button("⚡ INITIATE TRANSFER DISPATCH", use_container_width=True):
         if not api_key:
-            st.error("API Key missing! Add GEMINI_API_KEY in Secrets.")
+            st.error("API Key missing! Add GEMINI_API_KEY in Streamlit Secrets.")
         elif from_b == to_b:
             st.warning("Source and Destination branches cannot be the same.")
         elif not sender.strip():
@@ -270,33 +288,45 @@ if mode == "📤 Dispatch Item (Source)":
             st.warning("Please provide transfer items.")
         else:
             with st.spinner("AI Generating Verified Transfer Manifest..."):
-                try:
-                    client = genai.Client(api_key=api_key)
-                    prompt = (
-                        "You are an inter-branch logistics assistant. Parse this inventory transfer into a neat, "
-                        "itemized list with exact quantities and units:\n\n" + items_raw
-                    )
-                    res = client.models.generate_content(
-                        model='gemini-3.6-flash',
-                        contents=prompt
-                    )
-                    
-                    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-                    new_trx = {
-                        "id": len(st.session_state.transfers) + 1,
-                        "from_branch": from_b,
-                        "to_branch": to_b,
-                        "sender_name": sender,
-                        "receiver_name": "Pending Receipt",
-                        "raw_items": items_raw,
-                        "parsed_items": res.text,
-                        "status": "IN TRANSIT",
-                        "timestamp": now_str
-                    }
-                    st.session_state.transfers.append(new_trx)
-                    st.success(f"Transfer TRX-{new_trx['id']:04d} dispatched to {to_b}!")
-                except Exception as e:
-                    st.error(f"Error: {e}")
+                parsed_result = ""
+                client = genai.Client(api_key=api_key)
+                prompt = (
+                    "You are an inter-branch logistics assistant. Parse this inventory transfer into a neat, "
+                    "clean itemized list with exact quantities and units. Avoid unnecessary chat:\n\n" + items_raw
+                )
+                
+                # Multi-model fallback logic to prevent 503 / 404 errors
+                candidate_models = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash']
+                for model_candidate in candidate_models:
+                    try:
+                        res = client.models.generate_content(
+                            model=model_candidate,
+                            contents=prompt
+                        )
+                        if res.text:
+                            parsed_result = res.text
+                            break
+                    except Exception:
+                        continue
+                
+                # Fallback if server is busy / down
+                if not parsed_result:
+                    parsed_result = "\n".join([f"- {line.strip()}" for line in items_raw.split("\n") if line.strip()])
+
+                now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+                new_trx = {
+                    "id": len(st.session_state.transfers) + 1,
+                    "from_branch": from_b,
+                    "to_branch": to_b,
+                    "sender_name": sender,
+                    "receiver_name": "Pending Receipt",
+                    "raw_items": items_raw,
+                    "parsed_items": parsed_result,
+                    "status": "IN TRANSIT",
+                    "timestamp": now_str
+                }
+                st.session_state.transfers.append(new_trx)
+                st.success(f"Transfer TRX-{new_trx['id']:04d} dispatched to {to_b}!")
 
 elif mode == "📥 Receive Item (Destination)":
     st.markdown("##### 📦 INCOMING TRANSFER INVENTORY")
@@ -346,7 +376,7 @@ elif mode == "📥 Receive Item (Destination)":
             elif status == "RECEIVED":
                 st.write(f"👤 **Received & Signed by:** {trx.get('receiver_name')}")
                 
-                # Create Transfer Note PDF
+                # Generate PDF Document
                 pdf_bytes = generate_pdf(trx)
                 file_name = f"Transfer_Note_TRX_{trx['id']:04d}.pdf"
                 
@@ -361,7 +391,6 @@ elif mode == "📥 Receive Item (Destination)":
                     )
                 
                 with col2:
-                    # WhatsApp Direct Share Link
                     clean_items = trx['parsed_items'].replace('*', '').strip()
                     wa_message = (
                         f"*STOCK TRANSFER CONFIRMATION*\n\n"
@@ -378,4 +407,4 @@ elif mode == "📥 Receive Item (Destination)":
                     
                     st.markdown(f'<a href="{wa_url}" target="_blank" class="wa-btn">📲 Share on WhatsApp</a>', unsafe_allow_html=True)
             st.divider()
-        
+            
