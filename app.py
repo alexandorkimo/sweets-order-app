@@ -5,16 +5,17 @@ import datetime
 import urllib.parse
 import json
 import os
+import re
 
 # Page Setup
 st.set_page_config(
     page_title="STOCK TRANSFER | Jamal Showaiter",
-    page_icon="⚡",
+    page_icon="🍬",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-# Persistent Storage
+# Persistent Data Storage
 DB_FILE = "transfers_data.json"
 
 def load_data():
@@ -33,14 +34,35 @@ def save_data(data):
     except Exception:
         pass
 
-# NEXT-GEN 3D LUXURY GLASS UI + ANIMATION + SOUND INJECTION
+# Fallback Parsing Function: Automatically separates Item Name and Quantity
+def parse_items_manual(text):
+    parsed = []
+    lines = [l.strip() for l in text.split("\n") if l.strip()]
+    for line in lines:
+        # Match quantity at the end (e.g., 'kamfaroosh 10', 'Halwa 5 kg', 'Baklava - 3 boxes')
+        match = re.search(r"^(.*?)(?:\s*[-:]?\s*)(\d+(?:\.\d+)?\s*(?:kg|boxes|trays|pcs|pkts|nos)?)$", line, re.IGNORECASE)
+        if match:
+            desc = match.group(1).strip(" -:")
+            qty = match.group(2).strip()
+        else:
+            desc = line
+            qty = "-"
+        parsed.append({
+            "desc": desc if desc else line,
+            "qty": qty,
+            "sp": "",
+            "up": "",
+            "amt": ""
+        })
+    return parsed
+
+# 3D GLASSMORPHISM & TEXT ANIMATION STYLES
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;800&family=JetBrains+Mono:wght@600;800&display=swap');
     
     * {
         font-family: 'Space Grotesk', -apple-system, sans-serif;
-        letter-spacing: -0.2px;
     }
     
     #MainMenu, header, footer, .stDeployButton { 
@@ -48,88 +70,73 @@ st.markdown("""
         display: none !important; 
     }
     
-    /* Pitch Black OLED + Dynamic Mesh Gradients */
     .stApp {
-        background-color: #02040A !important;
+        background-color: #020408 !important;
         background-image: 
-            radial-gradient(at 0% 0%, rgba(217, 119, 6, 0.12) 0px, transparent 55%),
-            radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.1) 0px, transparent 55%),
-            radial-gradient(at 50% 30%, rgba(30, 41, 59, 0.4) 0px, transparent 100%) !important;
+            radial-gradient(circle at 50% 10%, rgba(245, 158, 11, 0.15) 0%, transparent 60%),
+            radial-gradient(circle at 90% 90%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 10% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 50%) !important;
         background-attachment: fixed !important;
         color: #F8FAFC !important;
     }
 
-    /* 3D Rotating Holographic Cube Reactor */
-    .hologram-stage {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 75px;
-        perspective: 800px;
-        margin-bottom: 12px;
+    /* 3D FLOATING & GLOWING TITLE ANIMATION */
+    .stage-3d {
+        perspective: 900px;
+        text-align: center;
+        padding: 15px 0 5px 0;
     }
     
-    .cube-3d {
-        width: 44px;
-        height: 44px;
-        transform-style: preserve-3d;
-        animation: spin3D 10s infinite linear;
-    }
-    
-    .face {
-        position: absolute;
-        width: 44px;
-        height: 44px;
-        background: rgba(217, 119, 6, 0.12);
-        border: 1.5px solid #F59E0B;
-        box-shadow: 0 0 15px rgba(245, 158, 11, 0.4), inset 0 0 10px rgba(245, 158, 11, 0.2);
-    }
-    
-    .face-front  { transform: rotateY(0deg) translateZ(22px); }
-    .face-back   { transform: rotateY(180deg) translateZ(22px); }
-    .face-right  { transform: rotateY(90deg) translateZ(22px); }
-    .face-left   { transform: rotateY(-90deg) translateZ(22px); }
-    .face-top    { transform: rotateX(90deg) translateZ(22px); }
-    .face-bottom { transform: rotateX(-90deg) translateZ(22px); }
-    
-    @keyframes spin3D {
-        0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
-        100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
-    }
-
-    /* 3D Glass Top Banner */
-    .header-box {
-        background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.85) 100%);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 20px;
-        padding: 20px;
-        margin-bottom: 18px;
-        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-        border-left: 4px solid #F59E0B;
-    }
-    
-    .comp-name {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 11px;
-        font-weight: 700;
-        color: #FBBF24;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        margin-bottom: 2px;
-    }
-
-    .app-title {
+    .brand-3d-text {
         font-size: 26px;
         font-weight: 800;
-        color: #FFFFFF;
-        letter-spacing: -0.5px;
-        margin: 0 0 8px 0;
-        text-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: #F59E0B;
+        text-shadow: 
+            0 1px 0 #D97706,
+            0 2px 0 #B45309,
+            0 3px 0 #92400E,
+            0 4px 0 #78350F,
+            0 10px 20px rgba(245, 158, 11, 0.5);
+        display: inline-block;
+        animation: float3D 4s ease-in-out infinite alternate;
+        transform-style: preserve-3d;
+    }
+    
+    @keyframes float3D {
+        0% {
+            transform: rotateX(12deg) rotateY(-8deg) translateZ(10px);
+        }
+        100% {
+            transform: rotateX(-8deg) rotateY(10deg) translateZ(25px);
+        }
     }
 
-    .branch-tag {
+    /* ULTRA 3D FROSTED GLASS CARD */
+    .header-box {
+        background: rgba(15, 23, 42, 0.65);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 
+            0 20px 40px rgba(0, 0, 0, 0.8), 
+            inset 0 1px 1px rgba(255, 255, 255, 0.2);
+        text-align: center;
+    }
+    
+    .sub-title {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: #FFFFFF;
+        margin-top: 4px;
+    }
+
+    .branch-pill {
         display: inline-flex;
         align-items: center;
         background: rgba(14, 165, 233, 0.15);
@@ -137,80 +144,59 @@ st.markdown("""
         color: #38BDF8;
         font-family: 'JetBrains Mono', monospace;
         font-size: 12px;
-        font-weight: 700;
-        padding: 4px 12px;
-        border-radius: 30px;
-        box-shadow: 0 0 15px rgba(14, 165, 233, 0.2);
+        font-weight: 800;
+        padding: 4px 14px;
+        border-radius: 20px;
+        box-shadow: 0 0 15px rgba(14, 165, 233, 0.25);
+        margin-top: 8px;
     }
 
-    /* Futuristic Live Order Card with Ambient Border */
-    .order-card-live {
-        background: linear-gradient(135deg, rgba(20, 27, 45, 0.8) 0%, rgba(11, 15, 25, 0.9) 100%);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(245, 158, 11, 0.35);
+    /* GLASS CARDS */
+    .order-card-3d {
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
         padding: 18px;
-        border-radius: 18px;
         margin-bottom: 14px;
-        box-shadow: 0 10px 30px -5px rgba(245, 158, 11, 0.15);
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .order-card-live::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; width: 4px; height: 100%;
-        background: #F59E0B;
-        box-shadow: 0 0 10px #F59E0B;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     }
 
-    /* Pulsing Status Badges */
-    .badge-pulsing {
+    /* BADGES */
+    .badge-transit {
         background: rgba(245, 158, 11, 0.15);
         color: #FBBF24;
         border: 1px solid rgba(245, 158, 11, 0.4);
         padding: 4px 10px;
-        border-radius: 20px;
+        border-radius: 15px;
         font-size: 11px;
         font-weight: 700;
         font-family: 'JetBrains Mono', monospace;
-        animation: pulseGlow 2s infinite;
     }
     
-    @keyframes pulseGlow {
-        0% { box-shadow: 0 0 0px rgba(245, 158, 11, 0); }
-        50% { box-shadow: 0 0 12px rgba(245, 158, 11, 0.5); }
-        100% { box-shadow: 0 0 0px rgba(245, 158, 11, 0); }
-    }
-
     .badge-received {
         background: rgba(16, 185, 129, 0.15);
         color: #34D399;
         border: 1px solid rgba(16, 185, 129, 0.4);
         padding: 4px 10px;
-        border-radius: 20px;
+        border-radius: 15px;
         font-size: 11px;
         font-weight: 700;
         font-family: 'JetBrains Mono', monospace;
     }
 
-    /* Glowing 3D Action Buttons */
+    /* BUTTONS */
     .stButton>button {
         background: linear-gradient(135deg, #D97706 0%, #B45309 100%) !important;
         color: #FFFFFF !important;
         border: 1px solid rgba(251, 191, 36, 0.4) !important;
         border-radius: 12px !important;
-        font-weight: 700 !important;
-        font-size: 14px !important;
+        font-weight: 800 !important;
         height: 48px !important;
         box-shadow: 0 8px 25px -4px rgba(217, 119, 6, 0.5) !important;
-        transition: all 0.2s ease !important;
     }
-    .stButton>button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 30px -4px rgba(217, 119, 6, 0.7) !important;
-    }
-
+    
     .wa-btn {
         display: block;
         background: linear-gradient(135deg, #10B981 0%, #059669 100%);
@@ -221,119 +207,132 @@ st.markdown("""
         text-decoration: none;
         font-weight: 700;
         font-size: 13px;
-        border: 1px solid rgba(52, 211, 153, 0.4);
         box-shadow: 0 8px 25px -4px rgba(16, 185, 129, 0.4);
     }
     
     .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stSelectbox>div>div {
-        background: rgba(15, 23, 42, 0.8) !important;
+        background: rgba(15, 23, 42, 0.75) !important;
         color: #F8FAFC !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border: 1px solid rgba(255, 255, 255, 0.14) !important;
         border-radius: 12px !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Voucher PDF Generator
+# BOLD DYNAMIC VOUCHER PDF GENERATOR (EXACT MATCH, NO EXTRA ROWS)
 def create_voucher_pdf(trx):
     pdf = FPDF(orientation='P', unit='mm', format='A4')
     pdf.set_auto_page_break(auto=False)
     pdf.add_page()
     
+    # Yellowish Tint Paper Background
     pdf.set_fill_color(254, 252, 235)
     pdf.rect(5, 5, 200, 287, "F")
     
-    pdf.set_xy(10, 10)
-    pdf.set_font("Helvetica", "B", 13)
-    pdf.set_text_color(20, 20, 20)
-    pdf.cell(190, 5, "JAMAL SHOWAITER SWEETS Co. W.L.L.", ln=True, align="C")
+    # Header Details
+    pdf.set_xy(10, 12)
+    pdf.set_font("Helvetica", "B", 14)
+    pdf.set_text_color(15, 23, 42)
+    pdf.cell(190, 6, "JAMAL SHOWAITER SWEETS Co. W.L.L.", ln=True, align="C")
     
-    pdf.set_font("Helvetica", "", 7.5)
+    pdf.set_font("Helvetica", "B", 8)
+    pdf.set_text_color(70, 70, 70)
     pdf.cell(190, 4, "P.O.Box : 1352 - Manama - Kingdom of Bahrain, Tel: 17341735, Fax: 17342252", ln=True, align="C")
     
-    pdf.ln(1)
-    pdf.set_font("Helvetica", "B", 11)
-    pdf.cell(190, 5, "STOCK TRANSFER NOTE", ln=True, align="C")
+    pdf.ln(2)
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.set_text_color(15, 23, 42)
+    pdf.cell(190, 6, "STOCK TRANSFER NOTE", ln=True, align="C")
     
-    pdf.set_xy(10, 26)
-    pdf.set_font("Helvetica", "B", 9.5)
+    # Serial No & Date
+    pdf.set_xy(10, 28)
+    pdf.set_font("Helvetica", "B", 10)
+    pdf.set_text_color(20, 20, 20)
     pdf.write(5, "No: ")
-    pdf.set_font("Helvetica", "B", 11)
+    pdf.set_font("Helvetica", "B", 12)
     pdf.set_text_color(220, 38, 38)
-    serial_str = f"ST {253600 + trx['id']}"
-    pdf.write(5, serial_str)
+    pdf.write(5, f"ST {253600 + trx['id']}")
     
     pdf.set_text_color(20, 20, 20)
-    pdf.set_xy(140, 26)
-    pdf.set_font("Helvetica", "B", 9)
+    pdf.set_xy(140, 28)
+    pdf.set_font("Helvetica", "B", 10)
     pdf.cell(12, 5, "Date: ")
-    pdf.set_font("Helvetica", "", 9)
+    pdf.set_font("Helvetica", "B", 10)
     pdf.cell(38, 5, f" {trx['date_str']}", border="B")
     
-    pdf.set_xy(10, 33)
+    # From Location & To Location
+    pdf.set_xy(10, 36)
+    pdf.set_font("Helvetica", "B", 10)
+    pdf.cell(28, 5, "From Location: ")
+    pdf.set_font("Helvetica", "B", 10)
+    pdf.cell(152, 5, f" {trx['from_branch']}", border="B")
+    
+    pdf.set_xy(10, 44)
+    pdf.set_font("Helvetica", "B", 10)
+    pdf.cell(24, 5, "To Location: ")
+    pdf.set_font("Helvetica", "B", 10)
+    pdf.cell(156, 5, f" {trx['to_branch']}", border="B")
+    
+    # Columns Header
+    widths = [12, 22, 76, 20, 20, 20, 20]
+    headers = ["S.No.", "Date", "Description", "Qty", "Selling Price", "Unit Price", "Amount"]
+    
+    pdf.set_xy(10, 53)
     pdf.set_font("Helvetica", "B", 9)
-    pdf.cell(26, 5, "From Location: ")
-    pdf.set_font("Helvetica", "", 9)
-    pdf.cell(154, 5, f" {trx['from_branch']}", border="B")
-    
-    pdf.set_xy(10, 40)
-    pdf.set_font("Helvetica", "B", 9)
-    pdf.cell(22, 5, "To Location: ")
-    pdf.set_font("Helvetica", "", 9)
-    pdf.cell(158, 5, f" {trx['to_branch']}", border="B")
-    
-    widths = [10, 18, 74, 14, 22, 22, 30]
-    headers = ["S.No.", "Date", "Description", "Qty", "Selling Price", "Unit Price", "Amount (BD)"]
-    
-    pdf.set_xy(10, 48)
-    pdf.set_font("Helvetica", "B", 8)
-    pdf.set_draw_color(70, 70, 70)
-    pdf.set_fill_color(250, 248, 228)
+    pdf.set_draw_color(50, 50, 50)
+    pdf.set_fill_color(245, 240, 215)
     
     for i in range(len(headers)):
-        pdf.cell(widths[i], 7, headers[i], border=1, align="C", fill=True)
+        pdf.cell(widths[i], 8, headers[i], border=1, align="C", fill=True)
     pdf.ln()
     
+    # Dynamic Item Rows (Only prints rows according to actual items)
     items = trx.get("items_list", [])
-    row_height = 8
-    pdf.set_font("Helvetica", "", 8)
+    row_height = 8.5
     
-    for row_idx in range(14):
+    for idx, it in enumerate(items):
         pdf.set_x(10)
-        if row_idx < len(items):
-            it = items[row_idx]
-            pdf.cell(widths[0], row_height, str(row_idx + 1), border=1, align="C")
-            pdf.cell(widths[1], row_height, trx['date_str'], border=1, align="C")
-            pdf.cell(widths[2], row_height, " " + str(it.get("desc", ""))[:42], border=1, align="L")
-            pdf.cell(widths[3], row_height, str(it.get("qty", "")), border=1, align="C")
-            pdf.cell(widths[4], row_height, str(it.get("sp", "")), border=1, align="C")
-            pdf.cell(widths[5], row_height, str(it.get("up", "")), border=1, align="C")
-            pdf.cell(widths[6], row_height, str(it.get("amt", "")), border=1, align="C")
-        else:
-            for w in widths:
-                pdf.cell(w, row_height, "", border=1)
+        pdf.set_font("Helvetica", "B", 9)
+        pdf.cell(widths[0], row_height, str(idx + 1), border=1, align="C")
+        
+        pdf.set_font("Helvetica", "", 9)
+        pdf.cell(widths[1], row_height, trx['date_str'], border=1, align="C")
+        
+        pdf.set_font("Helvetica", "B", 9.5)
+        pdf.cell(widths[2], row_height, " " + str(it.get("desc", ""))[:40], border=1, align="L")
+        
+        pdf.set_font("Helvetica", "B", 9.5)
+        pdf.cell(widths[3], row_height, str(it.get("qty", "")), border=1, align="C")
+        
+        pdf.set_font("Helvetica", "", 9)
+        pdf.cell(widths[4], row_height, str(it.get("sp", "")), border=1, align="C")
+        pdf.cell(widths[5], row_height, str(it.get("up", "")), border=1, align="C")
+        pdf.cell(widths[6], row_height, str(it.get("amt", "")), border=1, align="C")
         pdf.ln()
         
+    # Total Row
     pdf.set_x(10)
-    pdf.set_font("Helvetica", "B", 9)
-    pdf.cell(160, 7.5, "Total Amount  ", border=1, align="R")
-    pdf.cell(30, 7.5, trx.get("total_amount", ""), border=1, align="C")
-    pdf.ln(12)
+    pdf.set_font("Helvetica", "B", 10)
+    pdf.cell(sum(widths[:-1]), 8, "Total Amount  ", border=1, align="R")
+    pdf.cell(widths[-1], 8, str(trx.get("total_amount", "")), border=1, align="C")
+    pdf.ln(14)
     
+    # Signatures
     pdf.set_x(10)
-    pdf.set_font("Helvetica", "B", 9)
-    pdf.cell(20, 5, "Issued by: ")
-    pdf.set_font("Helvetica", "", 9)
-    pdf.cell(65, 5, f" {trx['sender_name']}", border="B")
+    pdf.set_font("Helvetica", "B", 10)
+    pdf.cell(22, 6, "Issued by: ")
+    pdf.set_font("Helvetica", "B", 10)
+    pdf.cell(65, 6, f" {trx['sender_name']}", border="B")
     
     pdf.set_x(115)
-    pdf.set_font("Helvetica", "B", 9)
-    pdf.cell(24, 5, "Approved by: ")
-    pdf.set_font("Helvetica", "", 9)
-    pdf.cell(61, 5, f" {trx.get('receiver_name', '')}", border="B")
+    pdf.set_font("Helvetica", "B", 10)
+    pdf.cell(26, 6, "Approved by: ")
+    pdf.set_font("Helvetica", "B", 10)
+    pdf.cell(59, 6, f" {trx.get('receiver_name', '')}", border="B")
     
     return bytes(pdf.output())
 
+# Branch List
 BRANCHES = [
     "KSSFCT-01",
     "KSSF-01",
@@ -351,26 +350,17 @@ if "b" in query_params:
     if val in BRANCHES:
         selected_branch = val
 
-# 3D Rotating Animated Hologram
+# 3D Animated Title Header
 st.markdown("""
-<div class="hologram-stage">
-    <div class="cube-3d">
-        <div class="face face-front"></div>
-        <div class="face face-back"></div>
-        <div class="face face-right"></div>
-        <div class="face face-left"></div>
-        <div class="face face-top"></div>
-        <div class="face face-bottom"></div>
-    </div>
+<div class="stage-3d">
+    <div class="brand-3d-text">JAMAL SHOWAITER</div>
 </div>
 """, unsafe_allow_html=True)
 
-# Top Luxury Header
 st.markdown(f"""
 <div class="header-box">
-    <div class="comp-name">JAMAL SHOWAITER SWEETS CO. W.L.L.</div>
-    <div class="app-title">STOCK TRANSFER</div>
-    <div class="branch-tag">⚡ TERMINAL: {selected_branch}</div>
+    <div class="sub-title">STOCK TRANSFER PORTAL</div>
+    <div class="branch-pill">⚡ LOCATION: {selected_branch}</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -390,14 +380,14 @@ api_key = st.secrets.get("GEMINI_API_KEY", "")
 
 # 1. DISPATCH TAB
 with tab_dispatch:
-    st.markdown("##### 📤 Initiate Stock Requisition")
+    st.markdown("##### 📤 Issue Stock Transfer Note")
     other_branches = [b for b in BRANCHES if b != selected_branch]
     to_loc = st.selectbox("Destination Location:", other_branches)
     issuer = st.text_input("Issued by (Staff Signature):", placeholder="Your Name")
     items_input = st.text_area(
-        "Manifest Details (Items & Qty):", 
-        placeholder="e.g.:\nHalwa Red King - 10 kg\nMixed Baklava VIP - 5 boxes\nKaju Katli - 2 kg",
-        height=120
+        "Enter Items & Qty:", 
+        placeholder="Type items freely:\nkamfaroosh 10\nHalwa Red King 5 kg\nVIP Baklava 2 boxes",
+        height=130
     )
     
     if st.button("🚀 Issue Stock Transfer Note", use_container_width=True, type="primary"):
@@ -406,15 +396,15 @@ with tab_dispatch:
         elif not items_input.strip():
             st.warning("Please specify the items to transfer.")
         else:
-            with st.spinner("Formatting Voucher..."):
+            with st.spinner("Processing & Extracting Quantities..."):
                 parsed_list = []
                 if api_key:
                     try:
                         client = genai.Client(api_key=api_key)
                         prompt = (
-                            "Extract items to JSON array with fields 'desc' and 'qty'. Example: "
-                            '[{"desc": "Halwa Red", "qty": "10 kg", "sp": "", "up": "", "amt": ""}]. '
-                            'Only output raw JSON without markdown:\n' + items_input
+                            "Extract each item description and its corresponding quantity strictly into a JSON list of objects. "
+                            "Format: [{\"desc\": \"kamfaroosh\", \"qty\": \"10\", \"sp\": \"\", \"up\": \"\", \"amt\": \"\"}]. "
+                            "Do not combine quantity inside desc. Only return raw JSON:\n" + items_input
                         )
                         res = client.models.generate_content(
                             model='gemini-2.5-flash',
@@ -425,9 +415,9 @@ with tab_dispatch:
                     except Exception:
                         parsed_list = []
                 
+                # If AI API latency or error occurs, run fast regex auto-parser
                 if not parsed_list:
-                    lines = [l.strip() for l in items_input.split("\n") if l.strip()]
-                    parsed_list = [{"desc": l, "qty": "", "sp": "", "up": "", "amt": ""} for l in lines]
+                    parsed_list = parse_items_manual(items_input)
                 
                 all_data = load_data()
                 now = datetime.datetime.now()
@@ -463,7 +453,7 @@ with tab_dispatch:
         </div>
         """, unsafe_allow_html=True)
 
-# 2. INCOMING TAB WITH AUDIO CHIME & LIVE ALERT
+# 2. INCOMING TAB WITH AUDIO & LIVE ALERT
 with tab_inbox:
     st.markdown(f"##### 📥 Live Incoming Queue ({selected_branch})")
     all_data = load_data()
@@ -472,7 +462,7 @@ with tab_inbox:
     if not incoming_pending:
         st.info(f"No pending transfers arriving at {selected_branch}.")
     else:
-        # LIVE NOTIFICATION CHIME (Plays standard notification chime sound via HTML5 Audio)
+        # Standard Audio Notification Chime
         audio_html = """
         <audio autoplay style="display:none;">
             <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
@@ -490,10 +480,10 @@ with tab_inbox:
         for trx in incoming_pending:
             v_no = f"ST {253600 + trx['id']}"
             st.markdown(f"""
-            <div class="order-card-live">
+            <div class="order-card-3d">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <b style="font-size: 16px; color: #38BDF8;">No: {v_no}</b>
-                    <span class="badge-pulsing">● LIVE INCOMING</span>
+                    <span class="badge-transit">⏳ PENDING ACCEPTANCE</span>
                 </div>
                 <div style="font-size: 13px; color: #E2E8F0; margin-top: 6px;">
                     Origin: <b>{trx['from_branch']}</b> | Dispatched by: <b>{trx['sender_name']}</b>
@@ -506,7 +496,7 @@ with tab_inbox:
             
             st.markdown("**Manifest Items:**")
             for it in trx['items_list']:
-                st.caption(f"• **{it.get('desc')}** — Qty: {it.get('qty', 'N/A')}")
+                st.caption(f"• **{it.get('desc')}** — Qty: **{it.get('qty', 'N/A')}**")
                 
             rec_name = st.text_input("Approved by (Receiver Signature):", key=f"rec_sig_{trx['id']}", placeholder="Type your name here...")
             
@@ -539,7 +529,7 @@ with tab_inbox:
                         use_container_width=True
                     )
                 with col2:
-                    wa_items = "\n".join([f"- {it.get('desc')} ({it.get('qty')})" for it in trx['items_list']])
+                    wa_items = "\n".join([f"- {it.get('desc')} (Qty: {it.get('qty')})" for it in trx['items_list']])
                     wa_msg = (
                         f"*JAMAL SHOWAITER SWEETS Co. W.L.L.*\n"
                         f"*STOCK TRANSFER NOTE*\n\n"
@@ -570,10 +560,10 @@ with tab_history:
             v_no = f"ST {253600 + trx['id']}"
             is_out = (trx["from_branch"] == selected_branch)
             direction = f"📤 Sent to {trx['to_branch']}" if is_out else f"📥 Received from {trx['from_branch']}"
-            badge_html = '<span class="badge-received">✅ RECEIVED</span>' if trx['status'] == "RECEIVED" else '<span class="badge-pulsing">⏳ IN TRANSIT</span>'
+            badge_html = '<span class="badge-received">✅ RECEIVED</span>' if trx['status'] == "RECEIVED" else '<span class="badge-transit">⏳ IN TRANSIT</span>'
             
             st.markdown(f"""
-            <div style="background: rgba(17, 24, 39, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); padding: 16px; border-radius: 14px; margin-bottom: 12px;">
+            <div class="order-card-3d">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <b style="font-size: 15px; color: #F8FAFC;">No: {v_no}</b>
                     {badge_html}
@@ -597,7 +587,7 @@ with tab_history:
                         use_container_width=True
                     )
                 with c2:
-                    wa_items = "\n".join([f"- {it.get('desc')} ({it.get('qty')})" for it in trx['items_list']])
+                    wa_items = "\n".join([f"- {it.get('desc')} (Qty: {it.get('qty')})" for it in trx['items_list']])
                     wa_msg = (
                         f"*JAMAL SHOWAITER SWEETS Co. W.L.L.*\n"
                         f"*STOCK TRANSFER NOTE*\n\n"
