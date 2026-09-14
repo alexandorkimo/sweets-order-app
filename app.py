@@ -42,9 +42,10 @@ if role == "🏪 Sweets Shop":
                         "Keep it short and clear:\n\n" + order_input
                     )
                     response = client.models.generate_content(
-    model='gemini-1.5-flash',
+    model='gemini-3.6-flash',
     contents=prompt
 )
+
 
                     
                     new_order = {
